@@ -1915,8 +1915,9 @@ IaB/p2smWK+da462VoA72LxeO/8G3HcqqZhAGDAAAAAASUVORK5CYII=" height="16" preserveAs
     ><g fill="gray" text-rendering="optimizeSpeed" font-size="11" font-family="&apos;Tahoma&apos;" transform="translate(1130,2875)" stroke="gray"
     ><path fill="none" d="M255 104 C268 104 256 102 277 102" clip-path="url(#clipPath152)"
     /></g
-    ><g fill="gray" text-rendering="optimizeSpeed" font-family="sans-serif" transform="translate(1184,2959)" stroke="gray"
-    ><rect x="0" y="0" clip-path="url(#clipPath101)" fill="none" width="201" rx="5" ry="5" height="39"
+    ><g fill="rgb(204,204,204)" text-rendering="optimizeSpeed" font-family="sans-serif" transform="translate(1184,2959)" stroke="rgb(204,204,204)"
+    ><rect x="0" y="0" clip-path="url(#clipPath101)" width="201" rx="5" ry="5" height="39" stroke="none"
+      /><rect x="0" y="0" clip-path="url(#clipPath101)" fill="none" width="201" rx="5" ry="5" height="39" stroke="gray"
     /></g
     ><g text-rendering="geometricPrecision" shape-rendering="crispEdges" font-family="sans-serif" transform="translate(1184,2959) scale(1.098999977112,1.098999977112)"
     ><text x="9" xml:space="preserve" y="15" clip-path="url(#clipPath102)" stroke="none"
