@@ -1,0 +1,276 @@
+<!-- 
+Genealogical tree of Binchhana Clan.
+Most of them settled in Nabarangpur district of Odisha, India
+
+Author: Swarupananda Bissoyi
+-->
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta name="Description" content="Genealogical tree of Binchhana Clan (ବିଞ୍ଛଣା ବଂଶ ବିରୁଦାବଳୀ)">
+    <meta name="author" content="Swarupananda Bissoyi">
+    <title>ବିଞ୍ଛଣା ବଂଶ ବିରୁଦାବଳୀ</title>
+  </head>
+  <body>
+  <script src="go.js"></script>
+  <h1>ବିଞ୍ଛଣା ବଂଶ ବିରୁଦାବଳୀ</h1>
+  <div id="allSampleContent" class="p-4 w-full">
+  <link href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700" rel="stylesheet" type="text/css">
+    <script id="code">
+    function init() {
+
+      // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+      // For details, see https://gojs.net/latest/intro/buildingObjects.html
+      const $ = go.GraphObject.make;  // for conciseness in defining templates
+
+      myDiagram =
+        $(go.Diagram, "myDiagramDiv",  // must be the ID or reference to div
+          {
+            "toolManager.hoverDelay": 100,  // 100 milliseconds instead of the default 850
+            allowCopy: false,
+            layout:  // create a TreeLayout for the family tree
+              $(go.TreeLayout,
+                { angle: 90, nodeSpacing: 10, layerSpacing: 40, layerStyle: go.TreeLayout.LayerUniform })
+          });
+
+      var bluegrad = '#90CAF9';
+      var pinkgrad = '#F48FB1';
+
+      // Legend disabled by Swarup
+      // Set up a Part as a legend, and place it directly on the diagram
+      /*
+      myDiagram.add(
+        $(go.Part, "Table",
+          { position: new go.Point(300, 10), selectable: false },
+          $(go.TextBlock, "Key",
+            { row: 0, font: "700 14px Droid Serif, sans-serif" }),  // end row 0
+          $(go.Panel, "Horizontal",
+            { row: 1, alignment: go.Spot.Left },
+            $(go.Shape, "Rectangle",
+              { desiredSize: new go.Size(30, 30), fill: bluegrad, margin: 5 }),
+            $(go.TextBlock, "Males",
+              { font: "700 13px Droid Serif, sans-serif" })
+          ),  // end row 1 
+          $(go.Panel, "Horizontal",
+            { row: 2, alignment: go.Spot.Left },
+            $(go.Shape, "Rectangle",
+              { desiredSize: new go.Size(30, 30), fill: pinkgrad, margin: 5 }),
+            $(go.TextBlock, "Females",
+              { font: "700 13px Droid Serif, sans-serif" })
+          )  // end row 2
+        ));
+        */ // End disable by Swarup
+
+      // get tooltip text from the object's data
+      function tooltipTextConverter(person) {
+        var str = "";
+        str += "Born: " + person.birthYear;
+        if (person.deathYear !== undefined) str += "\nDied: " + person.deathYear;
+        if (person.reign !== undefined) str += "\nReign: " + person.reign;
+        return str;
+      }
+
+      // define tooltips for nodes
+      var tooltiptemplate =
+        $("ToolTip",
+          { "Border.fill": "whitesmoke", "Border.stroke": "black" },
+          $(go.TextBlock,
+            {
+              font: "bold 8pt Helvetica, bold Arial, sans-serif",
+              wrap: go.TextBlock.WrapFit,
+              margin: 5
+            },
+            new go.Binding("text", "", tooltipTextConverter))
+        );
+
+      // define Converters to be used for Bindings
+      function genderBrushConverter(gender) {
+        if (gender === "M") return bluegrad;
+        if (gender === "F") return pinkgrad;
+        return "orange";
+      }
+
+      // replace the default Node template in the nodeTemplateMap
+      myDiagram.nodeTemplate =
+        $(go.Node, "Auto",
+          { deletable: false, toolTip: tooltiptemplate },
+          new go.Binding("text", "name"),
+          $(go.Shape, "Rectangle",
+            {
+              fill: "lightgray",
+              stroke: null, strokeWidth: 0,
+              stretch: go.GraphObject.Fill,
+              alignment: go.Spot.Center
+            },
+            new go.Binding("fill", "gender", genderBrushConverter)),
+          $(go.TextBlock,
+            {
+              font: "700 18px Droid Serif, sans-serif",
+              textAlign: "center",
+              margin: 10, maxSize: new go.Size(80, NaN)
+            },
+            new go.Binding("text", "name"))
+        );
+
+      // define the Link template
+      myDiagram.linkTemplate =
+        $(go.Link,  // the whole link panel
+          { routing: go.Link.Orthogonal, corner: 5, selectable: false },
+          $(go.Shape, { strokeWidth: 3, stroke: '#424242' }));  // the gray link shape
+
+      // here's the family data
+      var nodeDataArray = [
+        { key: 0, name: "ପୋଡ଼ାଲୋଡ଼ା", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1, parent: 0, name: "ଅନ୍ତରୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        
+        { key: 11, parent: 1, name: "ଦୁଃଖୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12, parent: 1, name: "ଜନାର୍ଦ୍ଦନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13, parent: 1, name: "ଦୈତାରି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        
+        { key: 111, parent: 11, name: "ଅଦ୍ୟରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 112, parent: 11, name: "ନିଦୁନସ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        
+        { key: 1111, parent: 111, name: "ଘାସି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1112, parent: 111, name: "ଧନୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 11111, parent: 1111, name: "ନରେନ୍ଦ୍ର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 11112, parent: 1111, name: "ଡମୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 111111, parent: 11111, name: "ଲକ୍ଷ୍ମୀ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 111112, parent: 11111, name: "ଦାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 111113, parent: 11111, name: "ମୁନା", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 111114, parent: 11111, name: "ରାମଚନ୍ଦ୍ର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 111121, parent: 11112, name: "ଭଗ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 11121, parent: 1112, name: "ଅକୃର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 11122, parent: 1112, name: "ପଦୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 111211, parent: 11121, name: "ଭୀଷ୍ମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 111221, parent: 11122, name: "ଦୁର୍ଗା", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121, parent: 12, name: "ନୀଳକଣ୍ଠ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 122, parent: 12, name: "ବରନଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 1211, parent: 121, name: "କଳାକାହ୍ନୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1212, parent: 121, name: "ବଣ୍ଡକା", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1213, parent: 121, name: "ବୃନ୍ଦାବନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 12111, parent: 1211, name: "ମୁକୁନ୍ଦ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12112, parent: 1211, name: "ନକୁଳ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12113, parent: 1211, name: "ନରହରି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12114, parent: 1211, name: "ଦୀନବନ୍ଧୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12115, parent: 1211, name: "ଭକ୍ତରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12116, parent: 1211, name: "କୃପାସିନ୍ଧୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12117, parent: 1211, name: "ପୂର୍ଣ୍ଣଚନ୍ଦ୍ର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121111, parent: 12111, name: "ଭରତ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121112, parent: 12111, name: "ସୀତାରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121113, parent: 12111, name: "କହ୍ନାଇ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121114, parent: 12111, name: "ଲଷ୍ମଣ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121121, parent: 12112, name: "ଜୀମୂତବାହନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121122, parent: 12112, name: "ରମେଶ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121131, parent: 12113, name: "ହଳଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121132, parent: 12113, name: "ହୃଷିକେଶ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121133, parent: 12113, name: "ଚନ୍ଦ୍ରଭାନୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121134, parent: 12113, name: "ଶଶିଭାନୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121141, parent: 12114, name: "ମହେଶ୍ୱର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121142, parent: 12114, name: "ଗଣପତି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121151, parent: 12115, name: "ବଳରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121152, parent: 12115, name: "ପର୍ଶୁରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121153, parent: 12115, name: "ନୀଳରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121161, parent: 12116, name: "ଅଚ୍ୟୁତ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121162, parent: 12116, name: "ଦେବ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121163, parent: 12116, name: "ତପନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121171, parent: 12117, name: "ରାଜେନ୍ଦ୍ର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121172, parent: 12117, name: "ରବୀନ୍ଦ୍ର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 12121, parent: 1212, name: "ଦଶରଥ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 12122, parent: 1212, name: "ଶ୍ରୀକୃଷ୍ଣ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121211, parent: 12121, name: "ଗୋପାଳ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121212, parent: 12121, name: "ଭରତ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121213, parent: 12121, name: "କମଳୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121214, parent: 12121, name: "ଖଗପତି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121215, parent: 12121, name: "ଉମାଶଙ୍କର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121221, parent: 12122, name: "ଜୟରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121222, parent: 12122, name: "ଶଶିଭୂଷଣ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121223, parent: 12122, name: "ଗୋପବନ୍ଧୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121224, parent: 12122, name: "ବ୍ରଜବନ୍ଧୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121225, parent: 12122, name: "ଶ୍ୟାମବନ୍ଧୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 12131, parent: 1213, name: "ଗୋବିନ୍ଦ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 121311, parent: 12131, name: "ରତନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121312, parent: 12131, name: "ଡମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 121313, parent: 12131, name: "ଭଗବାନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 1221, parent: 122, name: "ହରିଗୁଣ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        
+        { key: 12211, parent: 1221, name: "ପଦ୍ମନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        
+        { key: 122111, parent: 12211, name: "ଦାମୋଦର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 122112, parent: 12211, name: "ପର୍ଶୁରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 131, parent: 13, name: "ଘାସିରାମ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 1311, parent: 131, name: "କଟାକଲି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1312, parent: 131, name: "କହ୍ନେଇ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1313, parent: 131, name: "ଡମରୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1314, parent: 131, name: "କେଶବ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1315, parent: 131, name: "ଡମୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1316, parent: 131, name: "ରଘୁନାଥ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 1317, parent: 131, name: "ରୂପନାଥ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13111, parent: 1311, name: "ସୁନାଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13112, parent: 1311, name: "ଖଗପତି", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13113, parent: 1311, name: "ସୋମନାଥ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13121, parent: 1312, name: "କମଳ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13122, parent: 1312, name: "ସହଦେବ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13123, parent: 1312, name: "ଭୁବନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13131, parent: 1313, name: "ଚନ୍ଦ୍ରଶେଖର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13132, parent: 1313, name: "ମକର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13151, parent: 1315, name: "ମନ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13161, parent: 1316, name: "ଟଙ୍କଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+
+        { key: 13171, parent: 1317, name: "ହର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13172, parent: 1317, name: "କମଳୁ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13173, parent: 1317, name: "ପୂର୍ଣ୍ଣ", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13174, parent: 1317, name: "ରୂପଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" },
+        { key: 13175, parent: 1317, name: "ହଳଧର", gender: "M", birthYear: "-", deathYear: "-", reign: "-" }
+
+
+      ];
+
+      // create the model for the family tree
+      myDiagram.model = new go.TreeModel(nodeDataArray);
+
+      document.getElementById('zoomToFit').addEventListener('click', () => myDiagram.commandHandler.zoomToFit());
+
+      document.getElementById('centerRoot').addEventListener('click', () => {
+        myDiagram.scale = 1;
+        myDiagram.scrollToRect(myDiagram.findNodeForKey(0).actualBounds);
+      });
+
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+
+<div id="sample">
+  <div id="myDiagramDiv" style="background-color: white; border: 1px solid black; width: 100%; height: 550px; position: relative; -webkit-tap-highlight-color: rgba(255, 255, 255, 0);"><canvas tabindex="0" width="1067" height="667" style="position: absolute; top: 0px; left: 0px; z-index: 2; user-select: none; touch-action: none; width: 854px; height: 534px;">This text is displayed if your browser does not support the Canvas HTML element.</canvas><div style="position: absolute; overflow: auto; width: 854px; height: 548px; z-index: 1;"><div style="position: absolute; width: 4113.22px; height: 1px;"></div></div></div>
+  <p><button id="zoomToFit">Zoom to Fit</button> <button id="centerRoot">Center on root</button></p>
+  <p>Created by Swarupananda Bissoyi s/o: Gopabandhu Bissoyi, Nabarangpur</p>
+  </body>
+  </html>
