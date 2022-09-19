@@ -1,0 +1,1058 @@
+<!--
+    Author: Swarupananda Bissoyi
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link href="css/style.css" rel="stylesheet">
+        <link rel="shortcut icon" type="image/png" href="img/favicon.png">
+        <title>ଲକ୍ଷ୍ମଣ ମିଶ୍ରଙ୍କ ଅନୁଭୂତ ଯୋଗମାଳା ବା ସହଜ ଚିକିତ୍ସା</title>
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+		<link rel="stylesheet" href="css/jquery.mobile.iscrollview.css" />
+    	<link rel="stylesheet" href="css/jquery.mobile.iscrollview-pull.css" />   
+
+        <script src="js/jquery-1.11.2.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.js"></script>
+        
+        <!-- <script src="js/iscroll-lite.js"></script> -->
+        <script src="js/iscroll.js"></script>
+    	<script src="js/jquery.mobile.scrollview.js"></script> 
+
+    	<style type="text/css">
+    		.ui-input-text input, .ui-input-search input, textarea.ui-input-text {
+			     height:42px !important;
+                 font-size: 20px;
+			}
+     	</style>
+    </head>
+    <body>
+        <!--<script type="text/javascript" src="cordova.js"></script>-->
+        <!-- <script type="text/javascript" src="js/index.js"></script> -->
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+		    <symbol id="icon-copy" viewBox="0 0 32 32">
+		        <path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"></path>
+		    </symbol>
+		</svg>
+
+        <div data-role="page" id="mainpage">
+             <div  data-role="header" data-position="fixed" data-tap-toggle="false" data-transition="none">
+                 <div><img src="img/favicon.png" class="ui-btn-left"/></div>
+                 <!--  -->
+                 <h1><font size='+2'><b>ଲକ୍ଷ୍ମଣ ମିଶ୍ରଙ୍କ ଅନୁଭୂତ ଯୋଗମାଳା ବା ସହଜ ଚିକିତ୍ସା</b></font></h1>
+                 <div style="vertical-align: top;" align="right">
+                     <a href="#helppage" data-ajax="false" class="ui-btn ui-btn-right ui-icon-info ui-btn-icon-notext ui-corner-all">help</a>
+                     <a id="langOr" href="javascript:toggle_language();" style="text-decoration: none;">ଓଡ଼ିଆ</a>&nbsp;<a id="langEn" href="javascript:toggle_language();" style="text-decoration-color: red;">English</a>
+                </div> 
+                 <div id="searchBox">
+                    <!-- <input id="searchfield" type="search" name="searchfield" style="ime-mode: disabled" placeholder="ଫୋନେଟିକ୍‌ ଓଡ଼ିଆରେ ଲେଖନ୍ତୁ" size="20" maxlength="50" autocomplete="off" data-theme="a"> -->
+                    <input id="searchfield" type="search" name="searchfield" placeholder="Write about the disease" size="20" maxlength="50" autocomplete="off" autocapitalize="none" data-theme="a">
+                </div>
+
+
+            </div>
+            
+            <!-- https://github.com/watusi/jquery-mobile-iscrollview#:~:text=In%20order%20to%20implement%20pull,css%20in%20your%20. -->
+            <div id="pageContent" data-role="content" class="ui-content" data-iscroll>
+                <ul data-role="listview" id="fetchedWordList" data-filter="false" data-inset="false"></ul>
+            </div>
+            <!-- <div id="phoneticHelpContent" class="ui-content">
+                    <b>ଏହି ଆପ୍‌ରେ ବ୍ୟବହୃତ ଫୋନେଟିକ୍‌ ନିୟମାବଳୀ:</b><br> a=ଅ , A=ଆ , i=ଇ , I=ଈ , u=ଉ , U=ଊ , R=ଋ , e=ଏ , E=ଐ , o=ଓ , O=ଔ , v=ୱ୍ , ka=କ , kha=ଖ , ga=ଗ , gha=ଘ , ca=ଚ , cha=ଛ , ja=ଜ , jha=ଝ ,  Ta=ଟ , Tha=ଠ , Da=ଡ , Dha=ଢ , D'a=ଡ଼ , Dh'a=ଢ଼ , Na=ଣ , ta=ତ , tha=ଥ , da=ଦ , dha=ଧ , na=ନ , pa=ପ , pha=ଫ , ba=ବ , bha=ଭ , ma=ମ , Ja=ଯ , ra=ର , La=ଳ , ba=ବ , sha=ଶ , Sa=ଷ , sa=ସ , ha=ହ , M=ଂ , H=ଃ , ;=ଁ , khYa=କ୍ଷ , ya=ୟ , la=ଲ , kA=କା , ki=କି , kI=କୀ , ku=କୁ , kU=କୂ , kR=କୃ , ke=କେ , kE=କୈ , ko=କୋ , kO=କୌ , kva=କ୍ୱ , ka;=କଁ , kaM=କଂ , kra=କ୍ର , rka=ର୍କ , kLa=କ୍ଳ , kla=କ୍ଲ , ka'=କ୍‌ , tka=ତ୍କ , kka=କ୍କ , kTa=କ୍ଟ , kta=କ୍ତ , ksa=କ୍ସ , nka=ଙ୍କ , nkha=ଙ୍ଖ , nga=ଙ୍ଗ , ngha=ଙ୍ଘ , nca=ଞ୍ଚ , ncha=ଞ୍ଛ , nja=ଞ୍ଜ , njha=ଞ୍ଝ , nTa=ଣ୍ଟ , nTha=ଣ୍ଟ , nDa=ଣ୍ଡ , nDha=ଣ୍ଢ , nta=ନ୍ତ , ntha=ନ୍ଥ , nda=ନ୍ଦ , ndha=ନ୍ଧ , mpa=ମ୍ପ , mpha=ମ୍ଫ , mba=ମ୍ବ , mbha=ମ୍ଭ , cca=ଚ୍ଚ , ccha=ଚ୍ଛ , jja=ଜ୍ଜ , jjha=ଜ୍ଝ , jna=ଜ୍ଞ , TTa=ଟ୍ଟ , tta=ତ୍ତ , nna=ନ୍ନ , NNa=ଣ୍ଣ , tsa=ତ୍ସ , dva=ଦ୍ୱ , dbha=ଦ୍ଭ , dda=ଦ୍ଦ , ddha=ଦ୍ଧ , ska=ସ୍କ , skha=ସ୍ଖ , sta=ସ୍ତ , stha=ସ୍ଥ , spa=ସ୍ପ , spha=ସ୍ଫ , rcca=ର୍ଚ୍ଚ , Lpa=ଳ୍ପ , Lpha=ଳ୍ଫ , shca=ଶ୍ଚ , shcha=ଶ୍ଛ , Ska=ଷ୍କ , STa=ଷ୍ଟ , STha=ଷ୍ଠ , SNa=ଷ୍ଣ , ntra=ନ୍ତ୍ର ,  kya=କ୍ୟ , rYa=ର‍୍ୟ (କେବଳ 'ର' ପାଇଁ)
+            </div> -->
+
+
+            <!--<div data-role="footer">
+            </div>-->
+        </div>
+        <div data-role="page" id="wordpage" data-add-back-btn="true">
+            <div data-role="header">
+                <div><img src="img/favicon.png" class="ui-btn-left"/></div>
+                <h1><font size='+2'><b>ଲକ୍ଷ୍ମଣ ମିଶ୍ରଙ୍କ ଅନୁଭୂତ ଯୋଗମାଳା ବା ସହଜ ଚିକିତ୍ସା</b></font></h1>
+                
+                <!--<p style="text-align:center">ଓଡ଼ିଆ ଅଭିଧାନ ସମ୍ପର୍କରେ</p>-->
+
+                <a id="backBtnInWordPage" data-ajax="false" data-rel="back" class="ui-btn ui-btn-right ui-icon-back ui-btn-icon-notext ui-corner-all">back</a>
+                <!--<a href="#mainpage" class="ui-btn-right ui-btn circle_button">&#8678;</a>-->
+            </div>
+            <div role="main" class="ui-content" >
+            	<h3 id="headWord"></h3>
+            	<h3>ଚିକିତ୍ସା:</h3>
+                <p style="text-align: left;" id="wordParagraph" class="meaning" ></p>
+            </div>
+            <!--<div data-role="footer">
+            </div>-->
+        </div>
+        <div data-role="page" id="helppage" data-add-back-btn="true">
+            <div data-role="header">
+                <div><img src="img/favicon.png" class="ui-btn-left"/></div>
+                <h1>ଲକ୍ଷ୍ମଣ ମିଶ୍ରଙ୍କ ଅନୁଭୂତ ଯୋଗମାଳା ବା ସହଜ ଚିକିତ୍ସା ସମ୍ପର୍କରେ</h1>
+                <!--<p style="text-align:center">ଓଡ଼ିଆ ଅଭିଧାନ ସମ୍ପର୍କରେ</p>-->
+
+                <a href="#mainpage" id="backBtn2" data-ajax="false" data-rel="back" class="ui-btn ui-btn-right ui-icon-back ui-btn-icon-notext ui-corner-all">back</a>
+                <!--<a href="#mainpage" class="ui-btn-right ui-btn circle_button">&#8678;</a>-->
+            </div>
+
+            <div role="main" class="ui-content" >
+                <p style="text-align: left;">
+
+                    <p><b>ଏହି ଆପ୍‌ରେ ବ୍ୟବହୃତ ଫୋନେଟିକ୍‌ ନିୟମାବଳୀ:</b><br>  a=ଅ , A=ଆ , i=ଇ , I=ଈ , u=ଉ , U=ଊ , R=ଋ , e=ଏ , E=ଐ , o=ଓ , O=ଔ , v=ୱ୍ , ka=କ , kha=ଖ , ga=ଗ , gha=ଘ , ca=ଚ , cha=ଛ , ja=ଜ , jha=ଝ ,  Ta=ଟ , Tha=ଠ , Da=ଡ , Dha=ଢ , D'a=ଡ଼ , Dh'a=ଢ଼ , Na=ଣ , ta=ତ , tha=ଥ , da=ଦ , dha=ଧ , na=ନ , pa=ପ , pha=ଫ , ba=ବ , bha=ଭ , ma=ମ , Ja=ଯ , ra=ର , La=ଳ , ba=ବ , sha=ଶ , Sa=ଷ , sa=ସ , ha=ହ , M=ଂ , H=ଃ , ;=ଁ , khYa=କ୍ଷ , ya=ୟ , la=ଲ , kA=କା , ki=କି , kI=କୀ , ku=କୁ , kU=କୂ , kR=କୃ , ke=କେ , kE=କୈ , ko=କୋ , kO=କୌ , kva=କ୍ୱ , ka;=କଁ , kaM=କଂ , kra=କ୍ର , rka=ର୍କ , kLa=କ୍ଳ , kla=କ୍ଲ , ka'=କ୍‌ , tka=ତ୍କ , kka=କ୍କ , kTa=କ୍ଟ , kta=କ୍ତ , ksa=କ୍ସ , nka=ଙ୍କ , nkha=ଙ୍ଖ , nga=ଙ୍ଗ , ngha=ଙ୍ଘ , nca=ଞ୍ଚ , ncha=ଞ୍ଛ , nja=ଞ୍ଜ , njha=ଞ୍ଝ , nTa=ଣ୍ଟ , nTha=ଣ୍ଟ , nDa=ଣ୍ଡ , nDha=ଣ୍ଢ , nta=ନ୍ତ , ntha=ନ୍ଥ , nda=ନ୍ଦ , ndha=ନ୍ଧ , mpa=ମ୍ପ , mpha=ମ୍ଫ , mba=ମ୍ବ , mbha=ମ୍ଭ , cca=ଚ୍ଚ , ccha=ଚ୍ଛ , jja=ଜ୍ଜ , jjha=ଜ୍ଝ , jna=ଜ୍ଞ , TTa=ଟ୍ଟ , tta=ତ୍ତ , nna=ନ୍ନ , NNa=ଣ୍ଣ , tsa=ତ୍ସ , dva=ଦ୍ୱ , dbha=ଦ୍ଭ , dda=ଦ୍ଦ , ddha=ଦ୍ଧ , ska=ସ୍କ , skha=ସ୍ଖ , sta=ସ୍ତ , stha=ସ୍ଥ , spa=ସ୍ପ , spha=ସ୍ଫ , rcca=ର୍ଚ୍ଚ , Lpa=ଳ୍ପ , Lpha=ଳ୍ଫ , shca=ଶ୍ଚ , shcha=ଶ୍ଛ , Ska=ଷ୍କ , STa=ଷ୍ଟ , STha=ଷ୍ଠ , SNa=ଷ୍ଣ , ntra=ନ୍ତ୍ର ,  kya=କ୍ୟ , rYa=ର‍୍ୟ (କେବଳ 'ର' ପାଇଁ)</p>
+
+                
+                <p><b> ବି. ଦ୍ର:</b><i>ଚିକିତ୍ସା ପ୍ରଦର୍ଶିତ ସ୍ଥାନକୁ 'ଡବଲ୍‌ କ୍ଲିକ୍‌' କଲେ, ଚିକିତ୍ସା ବିବରଣୀ କ୍ଲିପ୍‌ବୋର୍ଡକୁ କପି ହୋଇଯିବ ।</i></p>
+                
+                <hr>
+                <p><b>Disclaimer:</b><br>
+This web site is a tribute to late <a href="https://or.wikipedia.org/wiki/%E0%AC%B2%E0%AC%95%E0%AD%8D%E0%AC%B7%E0%AD%8D%E0%AC%AE%E0%AC%A3_%E0%AC%AE%E0%AC%BF%E0%AC%B6%E0%AD%8D%E0%AC%B0">Laxman Mishra</a> famous for his two legendary books "Anubhuta Jogamala (Sahaja Chikitsa)" and "Anubhuta Jogamala -2 (Ghara Baida)". This web site is just an electronic searchable version of his book "Anubhuta Jogamala (Sahaja Chikitsa)". All the content of this website is "as is" in the original book. There may be spelling mistakes or mistakes due to typing or due to OCR errors from the original book page. Please follow the original book to get the correct information. The content provided in this web site are for educational and informational purposes only and does not constitute providing medical advice or professional services. The information provided should not be used for diagnosing or treating a health problem or disease, and those seeking personal medical advice should consult with a licensed physician. We strongly advise to seek the advice of your doctor or other qualified health provider regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something you have read on this website.
+If you think you may have a medical emergency, please call an ambulance and go to the nearest hospital immediately. No physician-patient relationship is created by this web site or its use. Neither the authors nor its mentors, nor any contributor to this web site, makes any representations, express or implied, with respect to the information provided herein or to its use.</p>
+                <hr>
+                <p><b>Ideation and Conceptualization:</b> Prof. Siba K. Udgata, University of Hyderabad</p>
+                <p><b>Developed by:</b>Mr. Swarupananda Bissoyi (swarupananda@gmail.com)</p>
+                <p><b>Website:</b> https://github.com/sbissoyi/</p>
+                <hr>             
+                
+            </div>
+            <!--<div data-role="footer">
+            </div>-->
+        </div>
+        <!--<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+        <script type='text/javascript'>
+            // Load the Google Transliterate API
+            google.load('elements', '1', {
+                packages: 'transliteration'
+            });
+            function onLoad() {
+                var options = {
+                    sourceLanguage:
+                            google.elements.transliteration.LanguageCode.ENGLISH,
+                    destinationLanguage:
+                            [google.elements.transliteration.LanguageCode.ORIYA],
+                    shortcutKey: 'ctrl+g',
+                    transliterationEnabled: true
+                };
+                // Create an instance on TransliterationControl with the required
+                // options.
+                var control =
+                        new google.elements.transliteration.TransliterationControl(options);
+                // Enable transliteration in the textbox with id
+                // 'transliterateTextarea'.
+                //control.makeTransliteratable(['transliterateTextInput']);
+                control.makeTransliteratable(['searchfield']);
+            }
+            google.setOnLoadCallback(onLoad);
+        </script>-->
+        <script type='text/javascript'>
+            diseasesOr = [] ;
+            diseasesEn = [] ;
+            var json ;
+
+            async function loadJSON() {
+                const response = await fetch("laxman.json");
+                json = await response.json();
+                //console.log(json);
+                diseasesOr = json.data.map(obj=>obj.entry.symptomOR);
+                diseasesEn = json.data.map(obj=>obj.entry.symptomEN);
+                //fetchWords() ;
+            }
+            loadJSON() ;
+
+            stop = true ;
+
+            /* Trasliterate Start */
+
+            stateStack = [] ;
+            initState = new Object() ;
+            initState.newState = "*" ;
+            initState.isFinal = false ;
+
+            var old_text ="";
+            var new_text = "";
+            var textStack = [] ;
+
+            //stateStack.push(initState) ;
+
+            currState = initState ;
+
+
+            function createState(oldState, key, newState, charMap, isFinal) 
+            {
+                if (state[oldState] == undefined)
+                    state[oldState] = new Object() ;
+                state[oldState][key] = new Object() ;
+                state[oldState][key].key = key ;
+                state[oldState][key].oldState = oldState ;
+                state[oldState][key].newState = newState ;
+                state[oldState][key].charMap = charMap ;
+                state[oldState][key].isFinal = isFinal ;
+            }
+
+            function clearAllState()
+            {
+                while( stateStack.length != 0 )
+                stateStack.pop() ;
+                currState = initState ;
+            }
+
+
+            state = new Array() ; //Array.from(Array(2), () => new Array(4));
+            state["*"] = new Object() ;
+            createState("*", 'a', '*', 'ଅ', true ) ;
+            createState("*", 'A', '*', 'ଆ', true ) ;
+            createState("*", 'i', '*', 'ଇ', true ) ;
+            createState("*", 'I', '*', 'ଈ', true ) ;
+            createState("*", 'u', '*', 'ଉ', true ) ;
+            createState("*", 'U', '*', 'ଊ', true ) ;
+            createState("*", 'e', '*', 'ଏ', true ) ;
+            createState("*", 'E', '*', 'ଐ', true ) ;
+            createState("*", 'o', '*', 'ଓ', true ) ;
+            createState("*", 'O', '*', 'ଔ', true ) ;
+            createState("*", 'R', '*', 'ଋ', true ) ;
+
+            createState("*", 'k', '-', 'କ୍', false ) ;
+            createState("*", 'K', '-', 'କ୍', false ) ; //supportCaps
+            createState("*", 'g', '-', 'ଗ୍', false ) ;
+            createState("*", 'G', '-', 'ଗ୍', false ) ; //supportCaps
+            createState("*", 'c', '-', 'ଚ୍', false ) ;
+            createState("*", 'C', '-', 'ଚ୍', false ) ; //supportCaps
+            createState("*", 'j', '-', 'ଜ୍', false ) ;
+            createState("*", 'T', '-', 'ଟ୍', false ) ;
+            createState("*", 't', '-', 'ତ୍', false ) ;
+            createState("*", 'D', '-', 'ଡ୍', false ) ;
+            createState("*", 'd', '-', 'ଦ୍', false ) ;
+            createState("*", 'N', '-', 'ଣ୍', false ) ;
+            createState("*", 'n', '-', 'ନ୍', false ) ;
+            createState("*", 'p', '-', 'ପ୍', false ) ;
+            createState("*", 'P', '-', 'ପ୍', false ) ; //supportCaps
+            createState("*", 'b', '-', 'ବ୍', false ) ;
+            createState("*", 'B', '-', 'ବ୍', false ) ; //supportCaps
+            createState("*", 'm', '-', 'ମ୍', false ) ;
+            createState("*", 'r', '-', 'ର୍', false ) ;
+            createState("*", 'J', '-', 'ଯ୍', false ) ;
+            createState("*", 's', '-', 'ସ୍', false ) ;
+            createState("*", 'S', '-', 'ଷ୍', false ) ;
+            createState("*", 'h', '-', 'ହ୍', false ) ;
+            createState("*", 'l', '-', 'ଲ୍', false ) ;
+            createState("*", 'L', '-', 'ଳ୍', false ) ;
+            createState("*", 'y', '-', 'ୟ୍', false ) ;
+            createState("*", 'J', '-', 'ଯ୍', false ) ;
+            createState("*", 'v', '-', 'ୱ୍', false ) ;
+            createState("*", 'V', '-', 'ୱ୍', false ) ; //supportCaps
+
+            createState("-", 'k', '-', 'କ୍', false ) ;
+            createState("-", 'K', '-', 'କ୍', false ) ; //supportCaps
+            createState("-", 'g', '-', 'ଗ୍', false ) ;
+            createState("-", 'G', '-', 'ଗ୍', false ) ; //supportCaps
+            createState("-", 'c', '-', 'ଚ୍', false ) ;
+            createState("-", 'C', '-', 'ଚ୍', false ) ; //supportCaps
+            createState("-", 'j', '-', 'ଜ୍', false ) ;
+            createState("-", 'J', '-', 'ଯ୍', false ) ;
+            createState("-", 'T', '-', 'ଟ୍', false ) ;
+            createState("-", 't', '-', 'ତ୍', false ) ;
+            createState("-", 'D', '-', 'ଡ୍', false ) ;
+            createState("-", 'd', '-', 'ଦ୍', false ) ;
+            createState("-", 'N', '-', 'ଣ୍', false ) ;
+            createState("-", 'n', '-', 'ନ୍', false ) ;
+            createState("-", 'p', '-', 'ପ୍', false ) ;
+            createState("-", 'P', '-', 'ପ୍', false ) ; //supportCaps
+            createState("-", 'b', '-', 'ବ୍', false ) ;
+            createState("-", 'B', '-', 'ବ୍', false ) ; //supportCaps
+            createState("-", 'm', '-', 'ମ୍', false ) ;
+            createState("-", 'r', '-', 'ର୍', false ) ;
+            createState("-", 's', '-', 'ସ୍', false ) ;
+            createState("-", 'S', '-', 'ଷ୍', false ) ;
+            createState("-", 'l', '-', 'ଲ୍', false ) ;
+            createState("-", 'L', '-', 'ଳ୍', false ) ;
+            createState("-", 'y', '-', 'ୟ୍', false ) ;
+            createState("-", 'v', '-', 'ୱ୍', false ) ;
+            createState("-", 'V', '-', 'ୱ୍', false ) ; //supportCaps
+
+            createState("-", 'h', '-', 'ହ୍', false ) ; 
+
+
+            // purnachheda
+            createState("*", '|', '*', '\u0964', true ) ;// ୲
+
+            //special case
+            createState("*", '\'', '*', '\u0B4D\u200c', true ) ;// ୍
+            createState("-", '\'', '-', '\u0B3C\u0B4D', false ) ;//଼ and ୍
+
+            createState("-", 'a', '*', '\u0B4D', true ) ; //୍
+            createState("-", 'A', '*', '\u0B3E', true ) ; //ା
+            createState("-", 'i', '*', '\u0B3F', true ) ;  //ି 
+            createState("-", 'I', '*', '\u0B40', true ) ; //ୀ
+            createState("-", 'u', '*', '\u0B41', true ) ; //ୁ 
+            createState("-", 'U', '*', '\u0B42', true ) ; // ୂ 
+            createState("-", 'R', '*', '\u0B43', true ) ; // ୃ 
+            //createState("-", 'R', '*', '\u0B44', true ) ; // Not Supporting // ୄ 
+            createState("-", 'e', '*', '\u0B47', true ) ; //େ
+            createState("-", 'E', '*', '\u0B48', true ) ; // ୈ 
+            createState("-", 'o', '*', '\u0B4B', true ) ; // ୋ 
+            createState("-", 'O', '*', '\u0B4C', true ) ; // ୌ
+
+            createState("-", 'r', '-', '\u0B30\u0B4D', false ) ; // ro fola
+            createState("-", 'y', '-', '\u0B73', false ) ; //୳
+            createState("-", 'Y', '-', 'Y', false ) ; // case for କ୍ଷ
+
+            createState("-", ';', '*', '\u0B01', true ) ; //ଁ  // use the key ;
+            createState("-", 'M', '*', '\u0B02', true ) ; // ଂ 
+
+            createState("*", ';', '*', '\u0B01', false ) ; //ଁ  // use the key ;
+            createState("*", 'M', '*', '\u0B02', false ) ; // ଂ 
+
+            createState("*", 'H', '*', '\u0B03', true ) ; // ଃ
+
+
+            function takeStateToOneStepBack(event) {
+                if( stateStack.length != 0 )
+                    currState = stateStack.pop() ;
+                if( stateStack.length == 0 )
+                    currState = initState ;
+                prevState1 = stateStack[stateStack.length - 1] ;
+                prevState2 = stateStack[stateStack.length - 2] ;
+                prevState3 = stateStack[stateStack.length - 3] ;
+                prevState4 = stateStack[stateStack.length - 4] ;
+            }
+
+            function handleBackSpace(newText, numStepsToBack)
+            {
+                console.log("Num steps backed =" + numStepsToBack) ;
+                for (var i = 0 ; i < numStepsToBack; i++) {
+                    textStack.pop() ;
+                    takeStateToOneStepBack() ;    
+                }
+                $("#searchfield").val(newText) ;
+            }
+
+            function transliterate(newCharPressed, replaceAtPosition)
+            {
+              if((/[a-zA-Z;|']/).test(newCharPressed))
+              {
+                if ( state[currState.newState] == undefined )
+                  return ;
+                if ( state[currState.newState][newCharPressed] == undefined )
+                  return ;
+                else
+                {
+                  stateStack.push(currState) ;
+                  currState = state[currState.newState][newCharPressed] ;
+                  currChar = currState.charMap ;
+                }
+              }
+              else
+              {
+                currChar = newCharPressed ;
+                currState = initState ;
+                while( stateStack.length != 0 )
+                  stateStack.pop() ;
+              }
+              prevState1 = stateStack[stateStack.length - 1] ;
+              prevState2 = stateStack[stateStack.length - 2] ;
+              prevState3 = stateStack[stateStack.length - 3] ;
+              prevState4 = stateStack[stateStack.length - 4] ;
+
+              console.log(currState) ;
+
+              replaceOneChar = false ;
+              replaceTwoChars = false ;
+              replaceThreeChars = false ;
+              replaceFourChars = false ;
+
+              // case for h
+              if ( currState.key == 'h' )
+              {
+                switch(prevState1.key)
+                {
+                  case 'K':  
+                  case 'k': currChar = 'ଖ୍' ; 
+                            if ((prevState2 != undefined && prevState2.key == 'n'))
+                            {
+                              currChar = "\u0b19\u0b4d\u0b16\u0b4d" ; //ଙ୍ଖ୍
+                              replaceFourChars = true ;
+                            }
+                            else
+                              replaceTwoChars = true ; 
+                            break ;
+                  case 'G':
+                  case 'g': currChar = 'ଘ୍' ; 
+                            if ((prevState2 != undefined && prevState2.key == 'n'))
+                            {
+                              currChar = "\u0b19\u0b4d\u0b18\u0b4d" ; //ଙ୍ଘ୍
+                              replaceFourChars = true ;
+                            }
+                            else
+                              replaceTwoChars = true ; 
+                            break ;
+                  case 'C':
+                  case 'c': currChar = 'ଛ୍' ; 
+                            if ((prevState2 != undefined && prevState2.key == 'n'))
+                            {
+                              currChar = "\u0b1e\u0b4d\u0b1b\u0b4d" ; //ଞ୍ଛ୍
+                              replaceFourChars = true ;
+                            }
+                            else
+                              replaceTwoChars = true ; 
+                            break ;
+                  case 'j': currChar = 'ଝ୍' ; 
+                            if ((prevState2 != undefined && prevState2.key == 'n'))
+                            {
+                              currChar = "\u0b1e\u0b4d\u0b1d\u0b4d" ; //ଞ୍ଝ୍
+                              replaceFourChars = true ;
+                            }
+                            else
+                              replaceTwoChars = true ; 
+                            break ;
+                  case 'T': currChar = 'ଠ୍' ; replaceTwoChars = true ; break ;
+                  case 'D': currChar = 'ଢ୍' ; replaceTwoChars = true ; break ;
+                  case 't': currChar = 'ଥ୍' ; replaceTwoChars = true ; break ;
+                  case 'd': currChar = 'ଧ୍' ; replaceTwoChars = true ; break ;
+                  case 'p': currChar = 'ଫ୍' ; replaceTwoChars = true ; break ;
+                  case 'b': currChar = 'ଭ୍' ; replaceTwoChars = true ; break ;
+                  case 'p': currChar = 'ଫ୍' ; replaceTwoChars = true ; break ;
+                  case 's': currChar = 'ଶ୍' ; replaceTwoChars = true ; break ;
+                  //case 'S': currChar = 'ଷ୍' ; replaceTwoChars = true ; break ;
+                  default: break ;
+                }
+              }
+
+
+              // case for nka, nga, nca, nja
+              if ( (prevState1 != undefined) && (prevState1.key == 'n' ))
+              {
+                switch(currState.key)
+                {
+                  case 'k': currChar = "\u0b19\u0b4d\u0b15\u0b4d" ; replaceTwoChars = true ; break ; //ଙ୍କ୍
+                  case 'g': currChar = "\u0b19\u0b4d\u0b17\u0b4d" ; replaceTwoChars = true ; break ; //ଙ୍ଗ୍
+                  case 'c': currChar = "\u0b1e\u0b4d\u0b1a\u0b4d" ; replaceTwoChars = true ; break ; //ଞ୍ଚ୍ 
+                  case 'j': currChar = "\u0b1e\u0b4d\u0b1c\u0b4d" ; replaceTwoChars = true ; break ; //ଞ୍ଜ୍
+                  default: break ;
+                }
+              }
+
+              // case for jna
+              if (((prevState1 != undefined) && (prevState1.key == 'j')) && currState.key == 'n')
+              {
+                currChar = "\u0b1c\u0b4d\u0b1e\u0b4d" ; //ଜ୍ଞ୍
+                replaceTwoChars = true ;
+              }
+
+              // case for ଡ଼୍
+              if (((prevState1 != undefined) && (prevState1.key == 'D')) && currState.key == '\'')
+              {
+                currChar = "\u0b5c\u0b4d" ; //ଡ଼୍
+                replaceTwoChars = true
+              }
+              // case for ଢ଼୍
+              if (((prevState2 != undefined) && (prevState2.key == 'D')) && ((prevState1 != undefined) && (prevState1.key == 'h')) && currState.key == '\'')
+              {
+                currChar = "\u0b5d\u0b4d" ; //ଢ଼୍
+                replaceTwoChars = true ;
+              }
+
+              prevText = document.getElementById("searchfield").value ;
+
+              if (currState.key == 'h' )
+              {
+                // h is used after kha, nkha, gha, ngha etc then ignore
+                if( prevText.endsWith('ଖ୍') || prevText.endsWith("\u0b19\u0b4d\u0b16\u0b4d") || prevText.endsWith('ଘ୍') || prevText.endsWith("\u0b19\u0b4d\u0b18\u0b4d") || prevText.endsWith('ଛ୍') || prevText.endsWith("\u0b1e\u0b4d\u0b1b\u0b4d") || prevText.endsWith('ଝ୍') || prevText.endsWith("\u0b1e\u0b4d\u0b1d\u0b4d") || prevText.endsWith('ଠ୍') || prevText.endsWith('ଢ୍') || prevText.endsWith('ଥ୍') || prevText.endsWith('ଧ୍') || prevText.endsWith('ଫ୍') || prevText.endsWith('ଭ୍') || prevText.endsWith('ଫ୍') || prevText.endsWith('ଶ୍')) 
+                {
+                    return ;
+                }
+              }
+
+
+              if (currState.isFinal == true) // if letter to be commpleted
+              {
+                //start after space
+                if ( prevState1 != undefined  && prevState1.newState == "*")
+                {
+                  // move cursor
+                  document.getElementById("searchfield").value = document.getElementById("searchfield").value + currChar ;  
+                }
+                else if ( prevState1 != undefined  && prevState1.isFinal == true)
+                {
+                  // move cursor
+                  document.getElementById("searchfield").value = document.getElementById("searchfield").value + currChar ;
+                  clearAllState() ;
+                }
+                else
+                {
+                  // concatenate
+                  if ( prevText.endsWith('\u0B4D') && currChar == '\u0B4D')
+                  {
+                    //console.log("---------------------" + textStack.length) ;
+                    newText = prevText.slice(0, -1)
+                    document.getElementById("searchfield").value = newText ;
+
+                  }
+                  else
+                  {
+                    newText = prevText.slice(0, -1) + currChar ;
+                    document.getElementById("searchfield").value = newText ;
+                  }
+                }
+              }
+              else
+              {
+                if ( replaceOneChar == true)
+                {
+                  newText = prevText.slice(0, -1) + currChar ;
+                  document.getElementById("searchfield").value = newText ;
+                }
+                else if ( replaceTwoChars == true)
+                {
+                  newText = prevText.slice(0, -2) + currChar ;
+                  document.getElementById("searchfield").value = newText ;
+                }
+                else if ( replaceThreeChars == true )
+                {
+                  newText = prevText.slice(0, -3) + currChar ;
+                  document.getElementById("searchfield").value = newText ; 
+                }
+                else if ( replaceFourChars == true )
+                {
+                  newText = prevText.slice(0, -4) + currChar ;
+                  document.getElementById("searchfield").value = newText ; 
+                }
+                else
+                {
+                  if ( prevText.endsWith('\u0B4D') && currChar == '\u0B73') //୳ case if ୳ after କ୍ then make it କ୍ୟ୍
+                  {
+                    //newText = prevText.slice(0, -1) + '\u0B73' + '\u0B4D' ;
+                    newText = prevText + '\u0B5F' + '\u0B4D' ;
+                    document.getElementById("searchfield").value = newText ;
+                  }
+                  else if ( prevText.endsWith('\u0B16\u0B4D') && currChar == 'Y') //make khY as କ୍ଷ୍
+                  {
+                    newText = prevText.slice(0, -2) + '\u0B15\u0B4D\u0B37\u0B4D' ;
+                    document.getElementById("searchfield").value = newText ;
+                  }
+                  else if ( prevText.endsWith('\u0B30\u0B4D') && currChar == 'Y') //make rY as //ର‍୍ୟ୍
+                  {
+                    newText = prevText.slice(0, -2) + "\u0b30\u200d\u0b4d\u0b5f\u0b4d" ; 
+                    document.getElementById("searchfield").value = newText ;
+                  }
+                  else 
+                  {
+                    // move cursor
+                    document.getElementById("searchfield").value = document.getElementById("searchfield").value + currChar ;
+                  }
+                }
+              }
+            }  
+      /* Transilterate end */
+
+
+            // instantiate our trie
+            //var trie = new Trie();
+
+            lang = "en" ;
+
+        	var timeouts = [];
+        	var stop = false ;
+        	var dictLoaded = false ;
+            var wordExpanded = [] ;
+            var lastElementExpanded = null;
+            var lastWordExpanded = null ;
+            var selectedWord = "" ;
+            var selectedIndex = -1 ;
+            
+
+            $(document).bind("mobileinit", function(){
+				$.mobile.pushStateEnabled = false;
+			});
+
+            function toggle_language() {
+                $("#langOr").removeAttr('style');
+                $("#langEn").removeAttr('style');
+                $('#searchfield').val("");
+                stopTimers() ;
+                clearList() ;
+                clearAllState() ;
+                if (lang == 'en') {
+                    lang = 'or';
+                    $("#langOr").css("text-decoration-color","red");
+                    $("#langEn").css("text-decoration","none");
+                    document.getElementById("searchfield").placeholder = "ରୋଗର ବିବରଣୀ ଫୋନେଟିକ୍‌ ଓଡ଼ିଆରେ ଲେଖନ୍ତୁ" ;
+                }
+                else {
+                    lang = 'en';
+                    $("#langEn").css("text-decoration-color","red");
+                    $("#langOr").css("text-decoration","none");
+                    document.getElementById("searchfield").placeholder = "Write about the disease" ;
+                }
+
+            }
+
+
+            function copyToClip(str) {
+              function listener(e) {
+                //e.clipboardData.setData("text/html", str);
+                e.clipboardData.setData("text/plain", str);
+                e.preventDefault();
+              }
+              document.addEventListener("copy", listener);
+              document.execCommand("copy");
+              document.removeEventListener("copy", listener);
+            };
+
+
+            function toast(msg){
+				//$("<div class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'><h3>"+msg+"</h3></div>")
+				$("<div class='ui-loader ui-shadow ui-body-e ui-corner-all'><h3>"+msg+"</h3></div>")
+				.css({ display: "block", 
+					opacity: 1, 
+					position: "fixed",
+					"background-color": "gray",
+					padding: "7px",
+					"text-align": "center",
+					width: "270px",
+					left: ($(window).width() - 284)/2,
+					top: $(window).height()/2 })
+					.appendTo( $.mobile.pageContainer ).delay( 1500 )
+					.fadeOut( 400, function(){
+						$(this).remove();
+					});
+			}
+
+
+            (function($){
+                var originalVal = $.fn.val;
+                $.fn.val = function(){
+                    var result =originalVal.apply(this,arguments);
+                    if(arguments.length>0)
+                        $(this).change();
+                    return result;
+                };
+                
+                //https://stackoverflow.com/questions/25806608/how-to-detect-browser-back-button-event-cross-browser                
+                //hack for # based page change detection
+                window.addEventListener('popstate', function(event) {
+                    // The popstate event is fired each time when the current history entry changes.
+                    //$("#searchfield").focus() ; // this does not work
+                }, false);
+            })(jQuery);
+
+            /**
+             * jQuery Plugin to get cursor position
+             */
+            (function ($) {
+                $.fn.getCursorPosition = function () {
+                    var input = this.get(0);
+                    if (!input) return; // No (input) element found
+                    if ('selectionStart' in input) {
+                        // Standard-compliant browsers
+                        return input.selectionStart;
+                    } else if (document.selection) {
+                        // IE
+                        input.focus();
+                        var sel = document.selection.createRange();
+                        var selLen = document.selection.createRange().text.length;
+                        sel.moveStart('character', -input.value.length);
+                        return sel.text.length - selLen;
+                    }
+                }
+            })(jQuery);
+
+            function stopTimers()
+            {
+                //console.log("StopTimers...") ;
+                //$.mobile.loading('hide');
+                for (var j = 0; j < timeouts.length; j++) {
+                    clearTimeout(timeouts[j]);
+                }
+                //quick reset of the timer array you just cleared
+                timeouts = [];
+            }
+
+            function clearList() {
+            	$("#fetchedWordList").html("") ;
+                $("#fetchedWordList").show() ;
+                $("#fetchedWordList").trigger('create');
+            }
+
+            function fetchNshowList() {
+                //console.log("fetchNshowList") ;
+                stop = true ;
+            	stopTimers() ;
+
+            	searchWord = $('#searchfield').val().trim();
+                if (searchWord.length > 0 )
+                {
+                    // Hack to get maximum number of words
+                    // If user types କ୍ (\uOB15\OB4D), then you will get all the words starting with କ୍ (\uOB15\OB4D)
+                    // But we can get more words starting with କ (\uOB15)
+
+                    if (searchWord.endsWith("\u0b4d"))
+                        searchWord = searchWord.slice(0,-1) ;
+
+                    $("#fetchedWordList").html("") ;
+                    $("#fetchedWordList").show() ;
+
+                    fetchWords(searchWord) ;
+                }
+                else
+                {
+                    clearList() ;
+                    //$('#phoneticHelpContent').hide() ;
+                }
+            }
+
+            $(document).on("pageshow",function(e){
+            	/*if ( dictLoaded == false) {
+	            	$.mobile.loading( "show");
+	            	window.setTimeout(function() {
+                        console.log("Loading 1,66,349 words from the Dictionary...");
+                        var script = document.createElement('script');
+                        script.src = 'js/1.js';
+                        document.body.appendChild(script);
+                        $.mobile.loading( "hide");
+                        dictLoaded = true ;
+
+	            	}, 100) ;
+
+	            }*/
+
+			})
+            
+            $("#wordpage").on("pageshow", function(e,data) {
+                remedy = json.data[selectedIndex].entry.remedy ;
+                remedy = remedy.split("\n").join("<br/><br/>");
+                $('#headWord').html("ରୋଗ: " + json.data[selectedIndex].entry.symptomOR + " ( " +json.data[selectedIndex].entry.symptomEN+")") ;
+                $('#wordParagraph').html(remedy) ;
+                e.stopPropagation();
+				e.stopImmediatePropagation();
+
+                // text copy feature
+                $('.meaning').on('dblclick', function(e){
+                    textTobeCopied = "ରୋଗ: " + json.data[selectedIndex].entry.symptomOR + " ( " +json.data[selectedIndex].entry.symptomEN+")\nଚିକିତ୍ସା:\n"+ $(this).text() ;
+                    copyToClip(textTobeCopied);
+
+                    toast("ଶବ୍ଦାର୍ଥ କ୍ଲିପ୍‌ବୋର୍ଡକୁ କପି ହୋଇସାରିଛି...");
+
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                });
+                
+                $('#backBtnInWordPage').on('click', function(e){
+                	//$.mobile.changePage( "#mainpage", { changeHash: true});
+
+                	$.mobile.back();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+
+                }) ;
+                
+            }) ;
+            
+
+            // -----------------------------------------
+            $(document).on( 'pageinit',function(event){
+
+                /*$('#backBtn').click(function(){
+                    parent.history.back();
+                    return false;
+                });*/
+
+                
+                var clickTimer ;
+
+                $('#fetchedWordList').on('click', function(e,ui) { 
+                    $("#searchfield").blur() ;
+                    // blur takes some time for keyboard to disappear, that's why give a 100 ms timeout
+                    clearTimeout(clickTimer) ;
+                    clickTimer = setTimeout( function() {
+                            //selectedWord = e.target.textContent ;
+                            selectedIndex = e.target.parentElement.id ;
+                            if (isNaN(selectedIndex) == false) // clicking outside the listitem is returning the id of the list and not of list item, that's why
+                            {
+                                //$.mobile.changePage( "#wordpage", { transition: "slideup", changeHash: true});
+                                
+                                $(this).css({background: 'blue'});
+                                //$.mobile.changePage( "#wordpage", { transition: "pop", changeHash: true});
+                                //$.mobile.changePage( "#wordpage", { changeHash: true});
+                                $.mobile.changePage( "#wordpage");
+                            }
+                            e.stopPropagation() ;
+                            e.stopImmediatePropagation() ;
+                        }, 100) ;
+                } ) ;
+
+                // when you scrolling the list of words, you dont want to show keyboard
+                $('#fetchedWordList').hover(function(){
+                    $("#searchfield").blur() ;
+                }, function(){
+
+                });
+
+
+                /* Creates a uppercase hex number with at least length digits from a given number */
+                function fixedHex(number, length){
+                    var str = number.toString(16).toUpperCase();
+                    while(str.length < length)
+                        str = "0" + str;
+                    return str;
+                }
+
+                function unicodeLiteral(str){
+                    var i;
+                    var result = "";
+                    for( i = 0; i < str.length; ++i){
+                        /* You should probably replace this by an isASCII test */
+                        if(str.charCodeAt(i) > 126 || str.charCodeAt(i) < 32)
+                            result += "\\u" + fixedHex(str.charCodeAt(i),4);
+                        else
+                            result += str[i];
+                    }
+
+                    return result;
+                }
+
+                // This method tries to figure out key press from the new input text which is already
+                // part of input text box
+                // so you compare with the old input and see what character got pressed 
+                function handleKeyPressed()
+                {
+                    
+                    old_text = textStack[textStack.length-1] ; // peek
+                    new_text = $("#searchfield").val() ;
+                    if (old_text != undefined)
+                        console.log("handleKeyPressed: old_text="+old_text+"["+unicodeLiteral(old_text)+"]("+old_text.length+"), new_text=" + new_text+"["+unicodeLiteral(new_text)+"]("+new_text.length+")") ;
+
+                    // Handle backspace
+                    if ((old_text != undefined && old_text.endsWith("\u0b4d")) && new_text.length == old_text.length-1)
+                    {
+                        // backspace on କ୍
+                        console.log("Backspace pressed 1") ;
+                        handleBackSpace(new_text.slice(0,-1), 1) ;
+                    }
+                    else if ((old_text != undefined && old_text.endsWith("\u0B4D\u200C")) && (new_text.endsWith("\u0B4D")) && (new_text.length == old_text.length-1)) 
+                    {
+                        // special case of backspace after halant(\u0B4D\u200C) as halant contains a \u0b4d before
+                        //console.log("Backspace pressed 2 (halant case)") ;
+                        handleBackSpace(new_text.slice(0,-1), 1) ; // erase \u0B4D, "\u200C" is already erased with backspace pressed
+                    }
+                    else if ( (old_text != undefined) && (new_text.length < old_text.length) /*&& old_text.startsWith(new_text)*/ )
+                    {
+                        // all you know is user has deleted some characters because new_text.length < old_text.length
+                        console.log("Backspace pressed 2") ;
+                        handleBackSpace( new_text, 1) ;
+                        textStack.push($("#searchfield").val()) ;
+                    }
+                    else
+                    {
+                        // the last character in your input box is the key pressed
+                        keyPressed = new_text.slice(-1);
+                        $("#searchfield").val(old_text) ;
+
+                        //transliterate and replace in the input box
+                        transliterate(keyPressed) ;
+                        
+                        // push the new input to stack
+                        textStack.push($("#searchfield").val()) ;
+                    }
+                    //console.log("Stack length = " + textStack.length) ;
+
+                    //console.log("key pressed fetchNShowList") ;
+                    fetchNshowList() ;
+
+                }
+
+                var pasted = false ;
+                function onInput_English(event) {
+                    fetchNshowList() ;
+                }
+                function onInput_Odia(event) {
+                    var s = $('#searchfield').val() ;
+                    console.log("OnInput: input="+s+"["+unicodeLiteral(s)+"]("+s.length+")");
+                    //alert("originalEvent.data = " + event.originalEvent.data + " which = " + event.which + ", keyCode = " + event.keyCode + ", key = " + event.key) ;
+                    stop = true ;
+                    stopTimers() ;
+                    if ( $('#searchfield').val().trim().length == 0 ) {
+                        //console.log("Empty input box") ;
+                        clearList() ;
+                        clearAllState() ;
+                        window.scrollTo(0,0,0, true);
+                        while(textStack.length != 0)
+                            textStack.pop() ;
+                        //$('#phoneticHelpContent').show() ;
+                    }
+                    else if (pasted)
+                    {
+                        pasted = false ;
+                        //console.log("Pasted......") ;
+                        clearAllState() ;
+                        while(textStack.length != 0)
+                            textStack.pop() ;
+
+                        // you should push all the prev words of the word pasted
+                        newstr = $('#searchfield').val() ;
+                        for ( var i = 0; i <= newstr.length; i++  )
+                            textStack.push(newstr.substring(0,i));
+                        
+                        fetchNshowList() ;
+                    }
+                    else
+                    {
+                        //var curorPos = $('#searchfield').getCursorPosition() ;
+                        console.log("Handling Key pressed") ;
+                        handleKeyPressed() ;
+                    }    
+                    event.stopPropagation() ;
+                    event.stopImmediatePropagation() ;
+                }
+
+
+                function onChange_English() {
+                    if ( $('#searchfield').val().trim().length == 0 )
+                        clearList() ;
+                }
+
+                // Handling onChange case only when user is pressing the cross button
+                // of the search input field
+                // That's not firing input event.
+                function onChange_Odia() {
+                    var s = $('#searchfield').val() ;
+                    //console.log("OnChange: input="+s+"["+unicodeLiteral(s)+"]("+s.length+")");
+                    //console.log($('#searchfield').val().trim().length) ;   
+                    if ( $('#searchfield').val().trim().length == 0 ) {
+                        stop = true ;
+                        stopTimers() ;
+                        clearList() ;
+                        clearAllState() ;
+                        while(textStack.length != 0)
+                            textStack.pop() ;
+                        //$('#phoneticHelpContent').show() ;
+                     }
+                     else {
+                        // Dont handle key press here...because input has taken care of it....
+                        //console.log("OnChange fetchNShowList") ;
+                        //fetchNshowList() ;
+                     }
+                }
+
+                var pasteTimer ;
+                function onPaste_English(event) {} 
+                function onPaste_Odia(event){
+                    //console.log("OnPaste Pasted Data = " + event.originalEvent.clipboardData.getData('text')); ;
+                    stop = true ;
+                    stopTimers() ;
+                    clearTimeout(pasteTimer) ;
+                    var pastedData = undefined ;
+                    pasted = false ;
+                    try
+                    {
+                        pastedData = event.originalEvent.clipboardData.getData('text') ;
+                        pasted = (pastedData != undefined) ;
+                        
+                    }catch(e) {}
+                    
+                    event.stopPropagation() ;
+                    event.stopImmediatePropagation() ;
+                }
+
+                $(document).on('input','#searchfield',function(event){
+                    if (lang == 'or')
+                        onInput_Odia(event) ;
+                    else
+                        onInput_English(event) ;
+                } ) ;
+                
+                
+                $(document).on('change','#searchfield',function() {
+                    if (lang == 'or')
+                        onChange_Odia() ;
+                    else
+                        onChange_English() ;
+                } ) ;
+
+                
+                $(document).on('paste','#searchfield',function(event) {
+                    if (lang == 'or')
+                        onPaste_Odia(event) ;
+                    else
+                        onPaste_English(event) ;
+                } ) ;
+
+            }) ;
+
+            function fetchWords(searchWord)
+            {
+                //data = trie.find(searchWord).sort() ;
+                data = (lang == 'or')? diseasesOr : diseasesEn ;
+                stop = false ;
+                i = 0 ;
+
+		        /*$.each(
+					data,
+					function(i,value){
+						if ( stop == false )
+						{
+							timeouts.push( setTimeout(function () {
+						             $('#fetchedWordList').append("<li><b>" + data[i] + "</b></li>").trigger('create');
+						      }, 0) ) ;
+						}
+						if ( stop )
+							return false ;
+					}
+				);*/
+                
+                /*if (data.length > 0 )
+                    $('#phoneticHelpContent').hide() ;
+                else
+                    $('#phoneticHelpContent').show() ;*/
+
+
+                // Reset scroll position on new word search
+
+                setTimeout(function () {
+                    window.scrollTo(0,0,0, true);
+                }, 0);
+                //console.log(iScroll) ;
+
+                document.addEventListener("touchstart", function(){}, false);
+
+                // store it in a variable so that you dont need to scan the entire DOM for fetchedWordList
+                wordListView = $('#fetchedWordList') ; 
+                
+                function runner() {
+
+                    if ( i < data.length) {
+                        //console.log("i ="+i+", data.length=" + data.length +", list size = " + $('#fetchedWordList li').length) ;
+                        //https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_filter_list
+                        if (data[i].toUpperCase().indexOf(searchWord.toUpperCase()) > -1) // filter 
+                        {
+                            wordListView.append("<li id='"+ i +"' style='white-space:normal;'><b>" + data[i] + "</b></li>") ;
+                            wordListView.listview('refresh');
+                        }
+
+                        i++;
+                        timeouts.push(  setTimeout(function() {
+                            runner();
+                        }, 0) ) ;
+                    }
+                    else{
+                        wordListView.listview('refresh');    
+                        stop = true ;
+                        //console.log("Runner Stopped") ;
+                        stopTimers() ;
+
+                    }
+                }
+
+                if ( stop == false )
+                {
+                    //console.log("Total words =" + data.length);
+                    //$.mobile.loading('show');
+                    runner() ;
+                }
+            }
+        </script>
+
+    </body>
+</html>
