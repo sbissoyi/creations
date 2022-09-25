@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/>
+<meta name="description" content="Plant Elements to Disease Mapping in Laxman Mishra's Book"/> 
+<link rel="stylesheet" href="css/gostyle.css"/> 
+<!-- Copyright 1998-2022 by Northwoods Software Corporation. -->
+<title>Plant Elements to Disease Mapping in Laxman Mishra's Book</title>
+</head>
+
+<body>
+    <!-- Start of GoJS sample code -->
+    
+    <script src="js/go.js"></script>
+    <div id="allSampleContent" class="p-4 w-full">
+    <script id="code">
+  // Use a TreeNode so that when a node is not visible because a parent is collapsed,
+  // connected links seem to be connected with the lowest visible parent node.
+  // This also forces other links connecting with nodes in the group to be rerouted,
+  // because collapsing/expanding nodes will cause many nodes to move and to appear or disappear.
+  class TreeNode extends go.Node {
+    constructor() {
+      super();
+      this.treeExpandedChanged = node => {
+        if (node.containingGroup !== null) {
+          node.containingGroup.findExternalLinksConnected().each(l => l.invalidateRoute());
+        }
+      };
+    }
+
+    findVisibleNode() {
+      // redirect links to lowest visible "ancestor" in the tree
+      var n = this;
+      while (n !== null && !n.isVisible()) {
+        n = n.findTreeParentNode();
+      }
+      return n;
+    }
+  }
+  // end TreeNode
+
+  // Control how Mapping links are routed:
+  // - "Normal": normal routing with fixed fromEndSegmentLength & toEndSegmentLength
+  // - "ToGroup": so that the link routes stop at the edge of the group,
+  //     rather than going all the way to the connected nodes
+  // - "ToNode": so that they go all the way to the connected nodes
+  //     but only bend at the edge of the group
+  var ROUTINGSTYLE = "ToNode" ; // "ToGroup"; //"Normal" "ToNode"
+
+  // If you want the regular routing where the Link.[from/to]EndSegmentLength controls
+  // the length of the horizontal segment adjacent to the port, don't use this class.
+  // Replace MappingLink with a go.Link in the "Mapping" link template.
+  class MappingLink extends go.Link {
+    getLinkPoint(node, port, spot, from, ortho, othernode, otherport) {
+      if (ROUTINGSTYLE !== "ToGroup") {
+        return super.getLinkPoint(node, port, spot, from, ortho, othernode, otherport);
+      } else {
+        var r = port.getDocumentBounds();
+        var group = node.containingGroup;
+        var b = (group !== null) ? group.actualBounds : node.actualBounds;
+        var op = othernode.getDocumentPoint(go.Spot.Center);
+        var x = (op.x > r.centerX) ? b.right : b.left;
+        return new go.Point(x, r.centerY);
+      }
+    }
+
+    computePoints() {
+      var result = super.computePoints();
+      if (result && ROUTINGSTYLE === "ToNode") {
+        var fn = this.fromNode;
+        var tn = this.toNode;
+        if (fn && tn) {
+          var fg = fn.containingGroup;
+          var fb = fg ? fg.actualBounds : fn.actualBounds;
+          var fpt = this.getPoint(0);
+          var tg = tn.containingGroup;
+          var tb = tg ? tg.actualBounds : tn.actualBounds;
+          var tpt = this.getPoint(this.pointsCount-1);
+          this.setPoint(1, new go.Point((fpt.x < tpt.x) ? fb.right : fb.left, fpt.y));
+          this.setPoint(this.pointsCount-2, new go.Point((fpt.x < tpt.x) ? tb.left : tb.right, tpt.y));
+        }
+      }
+      return result;
+    }
+  }
+  // end MappingLink
+
+
+    function init() {
+
+      // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+      // For details, see https://gojs.net/latest/intro/buildingObjects.html
+      const $ = go.GraphObject.make;  // for conciseness in defining templates
+
+      myDiagram =
+        $(go.Diagram, "myDiagramDiv",
+          {
+            "commandHandler.copiesTree": true,
+            "commandHandler.deletesTree": true,
+            // newly drawn links always map a node in one tree to a node in another tree
+            "linkingTool.archetypeLinkData": { category: "Mapping" },
+            "linkingTool.linkValidation": checkLink,
+            "relinkingTool.linkValidation": checkLink,
+            "undoManager.isEnabled": true,
+            "ModelChanged": e => {
+              if (e.isTransactionFinished) {  // show the model data in the page's TextArea
+                //<CommentSwarup
+                //document.getElementById("mySavedModel").textContent = e.model.toJson();
+                //</CommentSwarup>
+              }
+            }
+          });
+
+      // All links must go from a node inside the "Left Side" Group to a node inside the "Right Side" Group.
+      function checkLink(fn, fp, tn, tp, link) {
+        // make sure the nodes are inside different Groups
+        if (fn.containingGroup === null || fn.containingGroup.data.key !== -1) return false;
+        if (tn.containingGroup === null || tn.containingGroup.data.key !== -2) return false;
+        //// optional limit to a single mapping link per node
+        //if (fn.linksConnected.any(l => l.category === "Mapping")) return false;
+        //if (tn.linksConnected.any(l => l.category === "Mapping")) return false;
+        return true;
+      }
+
+      // Each node in a tree is defined using the default nodeTemplate.
+      myDiagram.nodeTemplate =
+        $(TreeNode,
+          { movable: false, copyable: false, deletable: false },  // user cannot move an individual node
+          // no Adornment: instead change panel background color by binding to Node.isSelected
+          {
+            selectionAdorned: false,
+            background: "white",
+            mouseEnter: (e, node) => node.background = "aquamarine",
+            mouseLeave: (e, node) => node.background = node.isSelected ? "skyblue" : "white"
+          },
+          new go.Binding("background", "isSelected", s => s ? "skyblue" : "white").ofObject(),
+          // whether the user can start drawing a link from or to this node depends on which group it's in
+          new go.Binding("fromLinkable", "group", k => k === -1),
+          new go.Binding("toLinkable", "group", k => k === -2),
+          $("TreeExpanderButton",  // support expanding/collapsing subtrees
+            {
+              width: 14, height: 14,
+              "ButtonIcon.stroke": "white",
+              "ButtonIcon.strokeWidth": 2,
+              "ButtonBorder.fill": "goldenrod",
+              "ButtonBorder.stroke": null,
+              "ButtonBorder.figure": "Rectangle",
+              "_buttonFillOver": "darkgoldenrod",
+              "_buttonStrokeOver": null,
+              "_buttonFillPressed": null
+            }),
+          $(go.Panel, "Horizontal",
+            { position: new go.Point(16, 0) },
+            //// optional icon for each tree node
+            //$(go.Picture,
+            //  { width: 14, height: 14,
+            //    margin: new go.Margin(0, 4, 0, 0),
+            //    imageStretch: go.GraphObject.Uniform,
+            //    source: "images/defaultIcon.png" },
+            //  new go.Binding("source", "src")),
+            /*//<CommentSwarup>
+            $(go.TextBlock,
+              new go.Binding("text", "key", s => "item " + s))
+              //</CommentSwarup>
+            */
+            //<AddSwarup>
+            $(go.TextBlock,
+              new go.Binding("text", "key", s => "" + s))
+            //</AddSwarup>
+          )  // end Horizontal Panel
+        );  // end Node
+
+      // These are the links connecting tree nodes within each group.
+
+      myDiagram.linkTemplate = $(go.Link);  // without lines
+
+      myDiagram.linkTemplate =  // with lines
+        $(go.Link,
+          {
+            selectable: false,
+            routing: go.Link.Orthogonal,
+            fromEndSegmentLength: 4,
+            toEndSegmentLength: 4,
+            fromSpot: new go.Spot(0.001, 1, 7, 0),
+            toSpot: go.Spot.Left
+          },
+          $(go.Shape,
+            { stroke: "lightgray" }));
+
+      // These are the blue links connecting a tree node on the left side with one on the right side.
+      myDiagram.linkTemplateMap.add("Mapping",
+        $(MappingLink,
+          { isTreeLink: false, isLayoutPositioned: false, layerName: "Foreground" },
+          { fromSpot: go.Spot.Right, toSpot: go.Spot.Left },
+          { relinkableFrom: true, relinkableTo: true },
+          $(go.Shape, { stroke: "blue", strokeWidth: 2 })
+        ));
+
+      myDiagram.groupTemplate =
+        $(go.Group, "Auto",
+          { deletable: false, layout: makeGroupLayout() },
+          new go.Binding("position", "xy", go.Point.parse).makeTwoWay(go.Point.stringify),
+          new go.Binding("layout", "width", makeGroupLayout),
+          $(go.Shape, { fill: "white", stroke: "lightgray" }),
+          $(go.Panel, "Vertical",
+            { defaultAlignment: go.Spot.Left },
+            $(go.TextBlock,
+              { font: "bold 14pt sans-serif", margin: new go.Margin(5, 5, 0, 5) },
+              new go.Binding("text")),
+            $(go.Placeholder, { padding: 5 })
+          )
+        );
+
+      function makeGroupLayout() {
+        return $(go.TreeLayout,  // taken from samples/treeView.html
+          {
+            alignment: go.TreeLayout.AlignmentStart,
+            angle: 0,
+            compaction: go.TreeLayout.CompactionNone,
+            layerSpacing: 16,
+            layerSpacingParentOverlap: 1,
+            nodeIndentPastParent: 1.0,
+            nodeSpacing: 0,
+            setsPortSpot: false,
+            setsChildPortSpot: false,
+            // after the tree layout, change the width of each node so that all
+            // of the nodes have widths such that the collection has a given width
+            commitNodes: function() {  // overriding TreeLayout.commitNodes
+              go.TreeLayout.prototype.commitNodes.call(this);
+              if (ROUTINGSTYLE === "ToGroup") {
+                updateNodeWidths(this.group, this.group.data.width || 100);
+              }
+            }
+          });
+      }
+
+      // Create some random trees in each group
+      var nodeDataArray = [
+        { isGroup: true, key: -1, text: "Elements", xy: "0 0", width: 150 },
+        { isGroup: true, key: -2, text: "Diseases", xy: "600 0", width: 150 }
+      ];
+      /* // <CommentSwarup>
+      var linkDataArray = [
+        { from: 6, to: 1012, category: "Mapping" },
+        { from: 4, to: 1006, category: "Mapping" },
+        { from: 9, to: 1004, category: "Mapping" },
+        { from: 1, to: 1009, category: "Mapping" },
+        { from: 14, to: 1010, category: "Mapping" }
+      ]; // </CommentSwarup>
+      */
+      //<AddSwarup>
+      var linkDataArray = [
+        { from: "ଅଁଳା", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ପିଲାମାନେ ବିଛଣାରେ ମୁତିଲେ", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ବାଛରା ଝାଡ଼ା", category: "Mapping" },
+{ from: "ଅଁଳା", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଅଁଳା)", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ଅଁଳାକୁ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଅଁଳାର", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଅଁଳାର", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ଅଁଳାରୁ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଅଁଳାରୁ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅକରକରା", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଅକରକରା", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଅକରକରା", to: "ଜିହ୍ବାର ଜଡ଼ତା", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ସଁବାଳୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ପଠା ଘା", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "କଙ୍କଡ଼ା ବିଛା ଓ ଶିଙ୍ଘମାଛ ବିଷ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ଅନ୍ତର୍ବିଦ୍ରଧୀ (ପେଟ ଭିତର ବ୍ରଣ ବା କ୍ୟାନ୍ସର)", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ବିଛୁଆତି, ବାଇଡ଼ଙ୍କ ଲାଗି କୁଣ୍ଡାଇ ହେଲେ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧି", to: "ମଳକଣ୍ଟକ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧିର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧୀ", to: "ଜନ୍ମରୋଧ", category: "Mapping" },
+{ from: "ଅକାନବିନ୍ଧୀ", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ଅଗରା", to: "ଚର୍ମରୋଗ (ରକ୍ତଦୋଷ ହେତୁ ସର୍ବପ୍ରକାର ଚର୍ମରୋଗ)", category: "Mapping" },
+{ from: "ଅଗରା", to: "ପିଲାଙ୍କର ଅଳତି ରୋଗ", category: "Mapping" },
+{ from: "ଅଗରା", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ଚର୍ମରୋଗ (ରକ୍ତଦୋଷ ହେତୁ ସର୍ବପ୍ରକାର ଚର୍ମରୋଗ)", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ପିଲାଙ୍କୁ ଘୁଡ଼ୁଘୁଡୁ ରୋଗ", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ଯୋନି କଣ୍ଡୁ", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ସର୍ଦ୍ଦି", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ସର୍ଦ୍ଦିକାଶ ଏକାବେଳେ ହେଲେ ଓ ଛାତିରେ କଫ ହେଲେ", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "ଚତୁର୍ଥକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଅଗସ୍ତି", to: "କଫ", category: "Mapping" },
+{ from: "ଅଗସ୍ତିପତ୍ର", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ଅଗି", to: "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", category: "Mapping" },
+{ from: "ଅଗିବଥୁ", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "କାନକୁଟୁରି ବା କାନରେ ପୋକ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ଦନ୍ତରୋଗ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ବାଲିଜନ୍ଦା ଓ ପାଣିଖିଆ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ପିଲାଙ୍କର କଷ୍ଟରେ ଟୋପା ଟୋପା ମୂତ ହେଲେ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ପିଲାଙ୍କର କାଶ ହେଲେ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ପିଲାଙ୍କର ମୂତ ବନ୍ଦ ହେଲେ", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଅଙ୍କରାନ୍ତି", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ଅଣସୋରିଷା", to: "ଯୋନିଦାହ", category: "Mapping" },
+{ from: "ଅଧତୋଳା", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଅଧତୋଳା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅଧଭରିକୁ", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ଅଧୁକା", to: "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଅନନ୍ତ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଅନନ୍ତ", to: "ପିଲାଙ୍କୁ ପାଟି ଭିତରେ, ଜିଭରେ ଓ ଓଠରେ ଘା ହେଲେ", category: "Mapping" },
+{ from: "ଅନନ୍ତ", to: "ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ଅପମାରଙ୍ଗ", to: "ବିଇଞ୍ଚି (ଏଜିମା)", category: "Mapping" },
+{ from: "ଅପମାରଙ୍ଗ", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ଅପମାର୍ଗ", to: "ତୃତୀୟକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "କଟା ଘା", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ଭୂତ ଉନ୍ମାଦ", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ଗଣ୍ଡମାଳା", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଅପରାଜିତା", to: "ଅମ୍ଳରୋଗ", category: "Mapping" },
+{ from: "ଅପରାଜିତାର", to: "ଗଳଗଣ୍ଡ", category: "Mapping" },
+{ from: "ଅପରାଜିତାର", to: "ଗୋଦର (ଶ୍ଲୀପଦ)", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଯୋନି ଶୂଳ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଲିଙ୍ଗାର୍ଶ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ତୀକ୍ଷ୍ମଣାଗ୍ନି ( ଅସ୍ୱାଭାବିକ କ୍ଷୁଧା )", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ବିଛୁଆତି, ବାଇଡ଼ଙ୍କ ଲାଗି କୁଣ୍ଡାଇ ହେଲେ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଅନ୍ଧାରକଣା", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ଆଖିର ଆଲୁଅ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ପିଲାଙ୍କ କୃମି", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "ଅପାମାରଙ୍ଗ)", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ଅପାମାର୍ଗ", to: "ଅମ୍ଳରୋଗ", category: "Mapping" },
+{ from: "ଅପାମାର୍ଗ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଅପାମାର୍ଗ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ଅମରପୋଇ", to: "ବାଛରା ଝାଡ଼ା", category: "Mapping" },
+{ from: "ଅମରପୋଇ", to: "ପିଲାଙ୍କର ମୂତ ବନ୍ଦ ହେଲେ", category: "Mapping" },
+{ from: "ଅମରପୋଇ", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "ଅମରପୋଇ", to: "କଲେରା (ବିସୂଚିକା)", category: "Mapping" },
+{ from: "ଅମୃତଭଣ୍ଡା", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଅରଖ", to: "କଣନଖା ( ହାତ ବା ଗୋଡ ଆଙ୍ଗୁଠି ନଖ କୋଣ ପାଚି ଯନ୍ତ୍ରଣା ହେବା )", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ଅରଖ", to: "କନିଅର ମଞ୍ଜି ବିଷ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ପିଲାଙ୍କର ହୁପିଙ୍ଗ୍ କଫ ବା କୁକୁର କାଶ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଅର୍ଶବଳି", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଯାଦୁ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଆଖିର ଆଲୁଅ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ପିଲାଙ୍କୁ ସର୍ଜିକାଶ ଥାଇ ଜ୍ଵର ହେଲେ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଜଳାତଙ୍କ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଗୋଦର (ଶ୍ଲୀପଦ)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ସର୍ଦ୍ଦିକାଶ ଏକାବେଳେ ହେଲେ ଓ ଛାତିରେ କଫ ହେଲେ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ବାୟା କୁକୁର ଓ ବାୟା ବିଲୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ମୁହଁର କଳାଦାଗ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଅଧକପାଳି ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ଅରଖ", to: "କଫ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ଆଖିର ପରଳ", category: "Mapping" },
+{ from: "ଅରଖ", to: "ମନ୍ୟାସ୍ତମ୍ବ (ବେକ ମୋଡି ହୋଇ ରହିଯିବା ରୋଗ)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ବାଗି (ପିଛୁଳି -ଜଙ୍ଘସନ୍ଧିରେ ଗ୍ରଛି ଫୁଲା)", category: "Mapping" },
+{ from: "ଅରଖ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଅରଖ", to: "କର୍ଣ୍ଣଶୂଳ (କାନ ଟାଣିଲେ)", category: "Mapping" },
+{ from: "ଅରଖ ।", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ଅରଖଗଛ", to: "ଗୋଦର (ଶ୍ଲୀପଦ)", category: "Mapping" },
+{ from: "ଅରଖମ୍ବଳ", to: "କଲେରା (ବିସୂଚିକା)", category: "Mapping" },
+{ from: "ଅରଖି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଅରଖି", to: "କଣନଖା ( ହାତ ବା ଗୋଡ ଆଙ୍ଗୁଠି ନଖ କୋଣ ପାଚି ଯନ୍ତ୍ରଣା ହେବା )", category: "Mapping" },
+{ from: "ଅରଖି", to: "ପିଲାଙ୍କର ହୁପିଙ୍ଗ୍ କଫ ବା କୁକୁର କାଶ", category: "Mapping" },
+{ from: "ଅରଖିଛାଲି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଅର୍ଜ", to: "ଜ୍ୱରରେ ବାମ୍ଫ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ମୁହଁର କଳାଦାଗ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ରକା (ପବନ ଅଟକିଯିବା)-(ଆଘାତ ଜନିତ ନୁହେଁ)", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନ", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ଅର୍ଜୁନଛାଲି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଅର୍ଜୁନଛାଲିର", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଅର୍ଥାତ୍", to: "ଆଖିର ପରଳ", category: "Mapping" },
+{ from: "ଅଲଗା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅଲଗା", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ଅଳେଇଚ", to: "ମସ୍ତିଷ୍କ ଦୁର୍ବଳତା", category: "Mapping" },
+{ from: "ଅଳେଇଚ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଅଳେଇଚର", to: "ମସ୍ତିଷ୍କ ଦୁର୍ବଳତା", category: "Mapping" },
+{ from: "ଅଶୋକ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଅଶୋକ", to: "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", category: "Mapping" },
+{ from: "ଅଶୋକ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଅଶୋକପତ୍ର", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଅଶୋକପତ୍ରର", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଅଶ୍ବତ୍ଥ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅଶ୍ବରୀ", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ଅଶ୍ୱତଥ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଅଶ୍ୱତଥ)", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "ଅଶ୍ୱତ୍ଥ", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "ଅଶ୍ୱତ୍ଥ", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ଅଶ୍ଵଗନ୍ଧ)", to: "ଅନିଦ୍ରା", category: "Mapping" },
+{ from: "ଅଶ୍ଵତ୍ଥ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଅଷାଢୁଆ", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ଅଷାଢୁଆ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ଅସ୍କନ୍ଦ", to: "ମହୁରା ବିଷ (ଦାରୁମୂଷି ବିଷ)", category: "Mapping" },
+{ from: "ଅସ୍କନ୍ଦ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଅସ୍କନ୍ଦମୂଳ", to: "ମହୁରା ବିଷ (ଦାରୁମୂଷି ବିଷ)", category: "Mapping" },
+{ from: "ଅସ୍ବଦ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଆକାଶ", to: "ମଳଦ୍ଵାର ବାହାରି ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଆଖି", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ଆଖିରେ", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ଆଙ୍କୁଲ", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ଆଙ୍କୁଲ", to: "ପିହୁଳା", category: "Mapping" },
+{ from: "ଆଙ୍କୁଲ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଆଙ୍କୁଲ", to: "କୋଷ୍ଠବଦ୍ଧ", category: "Mapping" },
+{ from: "ଆତ", to: "ବିସର୍ପ ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ଆମ୍ବ", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ଆମ୍ବ", to: "ପିଲାଙ୍କର କାନକଟା ଘା ହେଲେ", category: "Mapping" },
+{ from: "ଆମ୍ବ", to: "ସର୍ଦ୍ଦିକାଶ ଏକାବେଳେ ହେଲେ ଓ ଛାତିରେ କଫ ହେଲେ", category: "Mapping" },
+{ from: "ଆମ୍ବ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଆମ୍ବ", to: "ପରିସ୍ରା ବନ୍ଦ ହେତୁ ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ଇଠାଫଳ (", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଇଠାଫଳ (", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଇନ୍ଦ୍ରମାରିଷ", to: "ପିଲାଙ୍କର କାନ ଟାଣିଲେ", category: "Mapping" },
+{ from: "ଇନ୍ଦ୍ରମାରିଷ", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "ଇନ୍ଦ୍ରମାରିଷ", to: "ସ୍ତନହରା (ଥନହରା)", category: "Mapping" },
+{ from: "ଉତୁରୁଡ଼ି", to: "ଅନ୍ତକୋଷ", category: "Mapping" },
+{ from: "ଉସସ୍ତ", to: "ଅଗ୍ନି ଦଗ୍ଧ", category: "Mapping" },
+{ from: "ଏରଣ୍ଡ)", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ଏରଣ୍ଡ)", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଓଡ଼ିଶମାରି)", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଓଡ଼ିଶମାରୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଓସ୍ତ", to: "ପୁଷ୍ପବତୀ ହେବାକୁ", category: "Mapping" },
+{ from: "ଓସ୍ତ", to: "ପିହୁଳା", category: "Mapping" },
+{ from: "ଓସ୍ତ", to: "ପିଲାଙ୍କ ପାଟିରୁ ଲାଳସ୍ରାବ ହେଲେ", category: "Mapping" },
+{ from: "କଇଁଞ୍ଚକାକୁଡ଼ି", to: "କଣ୍ଟା, କାଚ, ଲୁହାକଣ୍ଟା ଗଳିଗଲେ", category: "Mapping" },
+{ from: "କଇଁଞ୍ଚକାକୁଡ଼ି", to: "ମୁଣ୍ଡ ବୁଲାଇହେଲେ", category: "Mapping" },
+{ from: "କଇଁଥ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କଇକୋଳି", to: "କଫ", category: "Mapping" },
+{ from: "କଇଞ୍ଚକାକୁଡ଼ି", to: "ମଳଦ୍ଵାର ବାହାରି ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "କଇଞ୍ଚକାକୁଡ଼ି", to: "ପାଗଳ ରୋଗ", category: "Mapping" },
+{ from: "କଇଞ୍ଚିକାକୁଡ଼ି", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "କକ (", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "କଖାରୁ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "କଙ୍କଡ଼ାଶୃଙ୍ଗାର", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "କଞ୍ଚନ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କଟୁକୀ", to: "ପାଣ୍ଡୁ (ଦେହର ଚର୍ମ ଅଳ୍ପ ହଳଦିଆ ମିଶ୍ରିତ ଧଳା ବା ସେଠୁଆ ଦେଖାଯାଏ) ", category: "Mapping" },
+{ from: "କଟୁକୀ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "କଟୁକୀ", to: "ସ୍ତନ ଦୁଧ ଦୂଷିତ ହେଲେ ବିଶୁଦ୍ଧ କରିବାକୁ", category: "Mapping" },
+{ from: "କଟୁକୀର", to: "ସ୍ତନ ଦୁଧ ଦୂଷିତ ହେଲେ ବିଶୁଦ୍ଧ କରିବାକୁ", category: "Mapping" },
+{ from: "କଣ୍ଟା,", to: "ପିଲାଙ୍କର ଅଳତି ରୋଗ", category: "Mapping" },
+{ from: "କଣ୍ଟାମାରିଷ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କଣ୍ଟାର", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "କଣ୍ଡ", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "କତକ", to: "ଆଖିର ଶୁକ୍ଳଭାଗରେ ରକ୍ତବିନ୍ଦୁ ପରି ଚିହ୍ନ (ଅର୍ଜୁନ ରୋଗ)", category: "Mapping" },
+{ from: "କତକ", to: "ଆଖିରୁ ପାଣି ବୋହିବା, କୁହୁଡ଼ିଆ ଦେଖାଯିବା", category: "Mapping" },
+{ from: "କତକ", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "କତକମଞ୍ଜି", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "କଦମ୍ବ", to: "ପେଟଫମ୍ପା", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ମୁଣ୍ଡର ଉକୁଣୀ", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ପଠା ଘା", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ଋତୁକାଳରେ ଅଧୁକ ରକ୍ତସ୍ରାବ", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ମୁଣ୍ଡର ଉପି ବା ରୁପି", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ବାଛରା ଝାଡ଼ା", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "କଦଳୀ", to: "ଅଗ୍ନି ଦଗ୍ଧ", category: "Mapping" },
+{ from: "କନିଅର", to: "ଆବୁ", category: "Mapping" },
+{ from: "କନିଅର", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "କନିଅର", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "କନ୍ଦାର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କନ୍ଦାର", to: "ଶୋଥ", category: "Mapping" },
+{ from: "କନ୍ଦୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କପା", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "କପା", to: "ଦୁଦୁରା ବିଷ", category: "Mapping" },
+{ from: "କପା", to: "ନିଦ ନ ହେବାକୁ", category: "Mapping" },
+{ from: "କପା", to: "ଶଙ୍ଖୁଆ ବିଷ", category: "Mapping" },
+{ from: "କପା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କପା", to: "ମହୁରା ବିଷ (ଦାରୁମୂଷି ବିଷ)", category: "Mapping" },
+{ from: "କପା", to: "ସ୍ତନରେ ଦୁଧ ହେବାକୁ", category: "Mapping" },
+{ from: "କପାମଞ୍ଜିକୁ", to: "ନିଦ ନ ହେବାକୁ", category: "Mapping" },
+{ from: "କବାବଚିନିକୁ", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "କବାବଚିନିର", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "କମଳ", to: "ଋତୁଶୂଳ ବା ବାଧକ", category: "Mapping" },
+{ from: "କରଞ୍ଜ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କରଡ଼ା", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "କର୍ଣ୍ଣ", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "କର୍ପୂର", to: "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", category: "Mapping" },
+{ from: "କର୍ପୂରାଦି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "କର୍ପୂରାଦ୍ୟମିଦଂ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "କଲରା", to: "ଅଶୁଦ୍ଧ ପାରା ଖାଇବାର କ୍ଷତିକାରକ ପ୍ରଭାବ", category: "Mapping" },
+{ from: "କଲରା", to: "ଶଙ୍ଖୁଆ ବିଷ", category: "Mapping" },
+{ from: "କଲରା", to: "ପିଲାଙ୍କର କୋଷ୍ଠବଦ୍ଧ ହେଲେ", category: "Mapping" },
+{ from: "କଲରା", to: "ନାଭି ଫୁଲିଲେ", category: "Mapping" },
+{ from: "କଲରା", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "କଲରା", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "କଲରା", to: "ସ୍ତନରେ ଦୁଧ ହେବାକୁ", category: "Mapping" },
+{ from: "କଲରା", to: "ପିଲାଙ୍କୁ ଘୁଡ଼ୁଘୁଡୁ ରୋଗ", category: "Mapping" },
+{ from: "କଲରା", to: "ବାୟା ହୋଇ ନଥୁବା କୁକୁର କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "କଳଦୀ", to: "କଟା ଘା", category: "Mapping" },
+{ from: "କଳମ୍ବ", to: "ଅଫିମ ବିଷ", category: "Mapping" },
+{ from: "କଳାଜୀରା", to: "ପିଲାମାନେ ବିଛଣାରେ ମୁତିଲେ", category: "Mapping" },
+{ from: "କଳାଜୀରା", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "କଳାଜୀରାର", to: "ସର୍ଦ୍ଦି", category: "Mapping" },
+{ from: "କଳାତୁଳସୀ", to: "ଅଶୁଦ୍ଧ ପାରା ଖାଇବାର କ୍ଷତିକାରକ ପ୍ରଭାବ", category: "Mapping" },
+{ from: "କଳାଦୁଦୁରା", to: "ପୁଷ୍ପବତୀ ହେବାକୁ", category: "Mapping" },
+{ from: "କଶ୍ଚି", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "କାଇଁଚ", to: "ଜନ୍ମରୋଧ", category: "Mapping" },
+{ from: "କାଇଁଚ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "କାଇଁଚକୁ", to: "ଚନ୍ଦାମୁଣ୍ଡରେ ବାଳ ଉଠିବାକୁ", category: "Mapping" },
+{ from: "କାଇଞ୍ଚ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "କୋଷ୍ଠବଦ୍ଧ", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "ପରିସ୍ରା ବନ୍ଦ ହେତୁ ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "ପିଲାମାନେ ବିଛଣାରେ ମୁତିଲେ", category: "Mapping" },
+{ from: "କାକୁଡ଼ି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "କାଗେଜିଲେମ୍ବୁ", to: "ପୁରାତନ ଜ୍ଵର", category: "Mapping" },
+{ from: "କାଢ଼ି", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "କାଣିଲେଉଟିଆ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କାଣିଲେଉଟିଆ", to: "ପବକାଣ୍ଡ (ବେଢ଼ାଆଙ୍ଗୁଳି)", category: "Mapping" },
+{ from: "କାରଣ", to: "ବାୟା କୁକୁର ଓ ବାୟା ବିଲୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "କାଳଦୁଦୁରା", to: "ଜନ୍ମରୋଧ", category: "Mapping" },
+{ from: "କାସୁଣ୍ଡା", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "କାସୁଣ୍ଡା", to: "ସଁବାଳୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "କାସୁଣ୍ଡା", to: "କଙ୍କଡ଼ା ବିଛା ଓ ଶିଙ୍ଘମାଛ ବିଷ", category: "Mapping" },
+{ from: "କାସୁନ୍ଦି", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "କାସୁନ୍ଦୀ", to: "ଗୋଦର (ଶ୍ଲୀପଦ)", category: "Mapping" },
+{ from: "କିଆ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କିଆଗଛ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "କିନ୍ତୁ", to: "ଆଖି ରକ୍ତବର୍ଣ୍ଣ ଦିଶିଲେ", category: "Mapping" },
+{ from: "କୁକୁର", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "କୁଡ଼ର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କୁଡ଼େଇର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କୁଢ଼", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "କୁଢ଼)", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "କୁରୁବେଲି", to: "ବାତପୈତ୍ତିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "କୁରୁବେଲିର", to: "ବାତପୈତ୍ତିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "କୁସୁମ", to: "କଟା ଘା", category: "Mapping" },
+{ from: "କୁସୁମ", to: "ନିର୍ଲୋମକରଣ", category: "Mapping" },
+{ from: "କୁସୁମ", to: "ପିଲାଙ୍କର କାନ ଟାଣିଲେ", category: "Mapping" },
+{ from: "କେଦାର", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "କେଦାର", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "କେବଳ", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "କେରୁଆ", to: "ରକ୍ତାତିସାର (ରକ୍ତଝାଡା)", category: "Mapping" },
+{ from: "କେରୁଆ", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "କେରୁଆଛାଲି", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "କେରୁଆଛାଲିର", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "କେସନ୍ଦରା", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "କୋଇଲେଖା", to: "ଲିଙ୍ଗରୁ ରକ୍ତ ସ୍ରାବ", category: "Mapping" },
+{ from: "କୋଇଲେଖା", to: "ଅଗିଆବାତ (ଦେହ କୁଣ୍ଡାଇ ହୋଇ ଚକାଚକା ହୋଇ ଫଳିଯିବା)", category: "Mapping" },
+{ from: "କୋଇଲେଖା", to: "ଅନିଦ୍ରା", category: "Mapping" },
+{ from: "କୋଇଲେଖା", to: "ଯକୃତ (ଲିଭର) ଠିକ୍ ଭାବରେ କାମ ନ କରିବା", category: "Mapping" },
+{ from: "କୋଇଲେଖା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "କୋଇଲେଖା ।", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଅଫିମ ଖାଇବା ଅଭ୍ୟାସ ଛାଡ଼ିବା ପାଇଁ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଦାନ୍ତର ପାଇରିଆ", category: "Mapping" },
+{ from: "କୋଚିଲା", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "କୋଚିଲାମଞ୍ଜି", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "କୋଚିଲାମଞ୍ଜି", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "କୋଚିଲାମଞ୍ଜିର", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "କୋଚିଳା", to: "ସର୍ଦ୍ଦି", category: "Mapping" },
+{ from: "କୋଚିଳାମଞ୍ଜି", to: "ସର୍ଦ୍ଦି", category: "Mapping" },
+{ from: "କୋରୁଆ", to: "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", category: "Mapping" },
+{ from: "କୋଳଥିଆ", to: "ଆଖିରେ ମୋତିଆବିନ୍ଦୁ", category: "Mapping" },
+{ from: "କୋଳଥିଆ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "କୋଳି", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "କ୍ଷୀରରେ", to: "କଫ", category: "Mapping" },
+{ from: "ଖଇ", to: "ସାପ ଗରଳ ଖାଇ ବିଷ ବିକାର ହେଲେ", category: "Mapping" },
+{ from: "ଖଇ", to: "ପିଲାଙ୍କର କାନରେ ପୂଯ ହେଲେ", category: "Mapping" },
+{ from: "ଖଇ", to: "କଣନଖା ( ହାତ ବା ଗୋଡ ଆଙ୍ଗୁଠି ନଖ କୋଣ ପାଚି ଯନ୍ତ୍ରଣା ହେବା )", category: "Mapping" },
+{ from: "ଖଇ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଖଇପରି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଖଇର", to: "ଦାନ୍ତ ଟାଣହେବାକୁ", category: "Mapping" },
+{ from: "ଖଇର", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଖଇର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଖଜୁର)", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଖଜୁରର", to: "ଅଳ୍ପାର୍ତବ ( ରଡ଼କାଳରେ ଅଳ୍ପ ଋତୁସ୍ରାବ), କଷ୍ଟାର୍ତବ", category: "Mapping" },
+{ from: "ଖଡ଼ିକାସିଝୁ", to: "ସୂତିକା ସନ୍ନିପାତ ରୋଗୀ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ଖଣ୍ଡିଏ", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "ଖାଇବ ।", to: "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଖାଇଲେ", to: "ପ୍ରସବ ପରେ ଫୁଲ ପଡ଼ିବାକୁ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ବିଛୁଆତି, ବାଇଡ଼ଙ୍କ ଲାଗି କୁଣ୍ଡାଇ ହେଲେ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ସଁବାଳୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ଗଇଶ", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "ଗଙ୍ଗଶିଉଳି", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଗଙ୍ଗଶିଉଳି", to: "ଅଣ୍ଟାଧରା", category: "Mapping" },
+{ from: "ଗଙ୍ଗଶିଉଳି", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଗଞ୍ଜାଇ", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଗନ୍ଧ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଗନ୍ଧକକୁ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଗନ୍ଧକର", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଗନ୍ଧଗୁହାରିଆ", to: "କଲେରା (ବିସୂଚିକା)", category: "Mapping" },
+{ from: "ଗନ୍ଧଣା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଗନ୍ଧଣା", to: "ମୋଟା ହୋଇଯିବା ରୋଗ (ମେଦ ରୋଗ ବା ସ୍ଥୌଲ୍ୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଗବ", to: "ଦନ୍ତରୋଗ", category: "Mapping" },
+{ from: "ଗବ", to: "ବ୍ୟାଧିହରଣ", category: "Mapping" },
+{ from: "ଗବ", to: "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", category: "Mapping" },
+{ from: "ଗବ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଗବ", to: "ମୋଟା ହୋଇଯିବା ରୋଗ (ମେଦ ରୋଗ ବା ସ୍ଥୌଲ୍ୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଗବଗଛର", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଗବଚେର", to: "ବ୍ୟାଧିହରଣ", category: "Mapping" },
+{ from: "ଗବଚେର", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଗମ୍ଭାରି", to: "ପବକାଣ୍ଡ (ବେଢ଼ାଆଙ୍ଗୁଳି)", category: "Mapping" },
+{ from: "ଗମ୍ଭାରୀ", to: "ସ୍ତନରକ୍ଷା", category: "Mapping" },
+{ from: "ଗମ୍ଭାରୀଗଛର", to: "ସ୍ତନରକ୍ଷା", category: "Mapping" },
+{ from: "ଗରୁଡ଼", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ଗରୁଡ଼", to: "ରକ୍ତଚାପ (ଉଚ୍ଚ)", category: "Mapping" },
+{ from: "ଗାଜର", to: "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", category: "Mapping" },
+{ from: "ଗିଲ", to: "ଅଶୁଦ୍ଧ ପାରା ଖାଇବାର କ୍ଷତିକାରକ ପ୍ରଭାବ", category: "Mapping" },
+{ from: "ଗିଲ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଗୁଆ", to: "ଅଫିମ ଖାଇବା ଅଭ୍ୟାସ ଛାଡ଼ିବା ପାଇଁ", category: "Mapping" },
+{ from: "ଗୁଜୁରାତି", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଗୁଜୁରାତି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଗୁଡ଼ିମାରି", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଗୁଳୁଚି", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "କଟା ଘା", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "ନାଳୀ ଘା (ଶୀରା ବା ଅସ୍ଥି ମଧ୍ୟରେ ଥିବା ସଂକୀର୍ଣ ମାର୍ଗରେ ହୋଇଥିବା କ୍ଷତ)", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଗେଣ୍ଡୁଫୁଲ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଗୋଖରା", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଗୋଖରା", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଗୋଖରାର", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଗୋଖୁରାକଣ୍ଟା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଗୋଠକାକୁଡ଼ି", to: "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ସନ୍ନିପାତ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ବିସର୍ପ ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ସ୍ବରଭଙ୍ଗ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଗଳା କ୍ୟାନସର୍", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ସର୍ବଜ୍ୱର ହର", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଅଫିମ ଖାଇବା ଅଭ୍ୟାସ ଛାଡ଼ିବା ପାଇଁ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଅଣ୍ଟାଧରା", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଅନ୍ଧାରକଣା", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ସ୍ତ୍ରୀ ରୋଗ (ଯାବତୀୟ ସ୍ତ୍ରୀ ରୋଗ)", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ", to: "ରକ୍ତଚାପ (ଉଚ୍ଚ)", category: "Mapping" },
+{ from: "ଗୋଲମରିଚ)", to: "କାନକୁଟୁରି ବା କାନରେ ପୋକ", category: "Mapping" },
+{ from: "ଗୋଲାପ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଘରପୋଡ଼ିଆ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଘଷିଲେ", to: "ପ୍ରସବ ପରେ ଫୁଲ ପଡ଼ିବାକୁ", category: "Mapping" },
+{ from: "ଘିକୁଆଁରୀ", to: "ଅଗ୍ନି ଦଗ୍ଧ", category: "Mapping" },
+{ from: "ଚକା", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ଚକ୍ରଦତ୍ତ)", to: "ଭୂତ ଉନ୍ମାଦ", category: "Mapping" },
+{ from: "ଚଢ଼େଇଗୁଡ଼ି", to: "ରକ୍ତମୂତ୍ର", category: "Mapping" },
+{ from: "ଚମ୍ପା", to: "ମୁଣ୍ଡର ଉପି ବା ରୁପି", category: "Mapping" },
+{ from: "ଚାଉଳଧୂଆ", to: "ଗଳା କ୍ୟାନସର୍", category: "Mapping" },
+{ from: "ଚାଉଳଭଜା", to: "ପରିସ୍ରା ବେଶି ହେଲେ", category: "Mapping" },
+{ from: "ଚାକୁଣ୍ଡା", to: "କଙ୍କଡ଼ା ବିଛା ଓ ଶିଙ୍ଘମାଛ ବିଷ", category: "Mapping" },
+{ from: "ଚାକୁଣ୍ଡା", to: "ଯାଦୁ", category: "Mapping" },
+{ from: "ଚାକୁଣ୍ଡା", to: "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", category: "Mapping" },
+{ from: "ଚାକୁଣ୍ଡା", to: "ବିଛୁଆତି, ବାଇଡ଼ଙ୍କ ଲାଗି କୁଣ୍ଡାଇ ହେଲେ", category: "Mapping" },
+{ from: "ଚାକୁଣ୍ଡା", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "ଚିତା", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "ଚିତାକୁଟି", to: "ପିଲାଙ୍କ ନାଳ ଝାଡ଼ା ଓ ନାଳରକ୍ତ ଝାଡ଼ା", category: "Mapping" },
+{ from: "ଚିତାକୁଟି", to: "ସ୍ତନରେ ଦୁଧ ହେବାକୁ", category: "Mapping" },
+{ from: "ଚିତାକୁଟି", to: "ଆଖି ରକ୍ତବର୍ଣ୍ଣ ଦିଶିଲେ", category: "Mapping" },
+{ from: "ଚିତାକୁଟି", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଚିତାକୁଟି", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "ଚିତାକୁଟି)", to: "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ପାଚିଲା ବ୍ରଣ ଫଟାଇବାକୁ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଅଗ୍ନିମାନ୍ଦ୍ୟ (ପରିପାକ ଶକ୍ତିର ହ୍ରାସ)", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ଚିତାପାରୁ", to: "ମଳକଣ୍ଟକ", category: "Mapping" },
+{ from: "ଚିନି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଚିନିର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଚିରେଇତା", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଚିରେଇତାର", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଚେତି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଚେମଣିଲଇ", to: "ପିଲାଙ୍କୁ ପାଟି ଭିତରେ, ଜିଭରେ ଓ ଓଠରେ ଘା ହେଲେ", category: "Mapping" },
+{ from: "ଚେମଣିଲେଇ", to: "ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ଚେମିଣିଲଇ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଛଚିନା", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଛଚିନା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଛାଲିଆ", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "ଜଡ଼ା", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ଜଡ଼ା", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଜଡ଼ା", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ଜଡ଼ା", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଜୟନ୍ତୀ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଜୟନ୍ତୀ", to: "କଫ", category: "Mapping" },
+{ from: "ଜୟନ୍ତୀ", to: "ଜନ୍ମରୋଧ", category: "Mapping" },
+{ from: "ଜୟପାଳ", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଜହ୍ନି", to: "ନାକ ଭିତରେ ପିନସ୍ ଘା", category: "Mapping" },
+{ from: "ଜହ୍ନି", to: "ଅର୍ଶବଳି", category: "Mapping" },
+{ from: "ଜାଇ", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଜାଇତ୍ରୀର", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଜାମୁ", to: "ପିଲା ଦୁଧ ଛାଡ଼ିବାକୁ", category: "Mapping" },
+{ from: "ଜାମୁ", to: "ପ୍ରସବ ବା ଗର୍ଭପାତ ପରେ ବେଶି ରକ୍ତସ୍ରାବ ହେଉଥିଲେ", category: "Mapping" },
+{ from: "ଜାମୁକୋଳି", to: "ରକ୍ତାତିସାର (ରକ୍ତଝାଡା)", category: "Mapping" },
+{ from: "ଜାମୁକୋଳି", to: "ଶଙ୍ଖୁଆ ବିଷ", category: "Mapping" },
+{ from: "ଜାମୁଗଛର", to: "ପିଲା ଦୁଧ ଛାଡ଼ିବାକୁ", category: "Mapping" },
+{ from: "ଜୀରା", to: "ହରିତାଳ ବିଷ", category: "Mapping" },
+{ from: "ଜୁଆଣୀ", to: "ଅଙ୍କୁଶ କୃମି", category: "Mapping" },
+{ from: "ଜୁଆଣୀ ।", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ଜେଉଟ", to: "ପୁଷ୍ପବତୀ ହେବାକୁ", category: "Mapping" },
+{ from: "ଟଭା", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "ଟଭା", to: "ମୃତବତ୍ସା ((ଯେଉଁ ମା'ର ପିଲା ପେଟରୁ ମରିକରି ଜନ୍ମହେଲେ କିମ୍ବା ଜନ୍ମର ୨ ବର୍ଷ ଭିତରେ ମରିଯାଉଥିଲେ )", category: "Mapping" },
+{ from: "ଟଭାଚେର (", to: "ମୃତବତ୍ସା ((ଯେଉଁ ମା'ର ପିଲା ପେଟରୁ ମରିକରି ଜନ୍ମହେଲେ କିମ୍ବା ଜନ୍ମର ୨ ବର୍ଷ ଭିତରେ ମରିଯାଉଥିଲେ )", category: "Mapping" },
+{ from: "ଡାଲଚିନି", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଡାଲଚିନି", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଡ଼ାଲଚିନି", to: "ଜ୍ୱରରେ ରୋଗୀର ପଥ୍ୟ", category: "Mapping" },
+{ from: "ଡାଳ", to: "ହରପିସ୍ (ମାଙ୍କଡ଼ସା ମୂତିବା ରୋଗ)", category: "Mapping" },
+{ from: "ଡାଳ,", to: "ଆଖିର ପରଳ", category: "Mapping" },
+{ from: "ଡ଼ାଳି", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ଡାଳିମ୍ବ", to: "କାଶ", category: "Mapping" },
+{ from: "ଡାଳିମ୍ବ", to: "ପିଲାଙ୍କ କୃମି", category: "Mapping" },
+{ from: "ଡାଳିମ୍ବ", to: "ନାକର ସମସ୍ତ ରୋଗ", category: "Mapping" },
+{ from: "ଡାଳିମ୍ବ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଡ଼ିମିରି", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଡ଼ିମ୍ବରି", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ଡ଼ିମ୍ବିରି", to: "ନାଳୀ ଘା (ଶୀରା ବା ଅସ୍ଥି ମଧ୍ୟରେ ଥିବା ସଂକୀର୍ଣ ମାର୍ଗରେ ହୋଇଥିବା କ୍ଷତ)", category: "Mapping" },
+{ from: "ଡ଼ିମ୍ବିରି", to: "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଡ଼େଙ୍ଗାଭେଜି", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଢ଼ାମଣା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତାପରେ", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ତାର", to: "(ପୂତିକର୍ଣ୍ଣ) କାନରୁ ପୂଯ ବାହାରିବା", category: "Mapping" },
+{ from: "ତାଳ", to: "ଋତୁଶୂଳ ବା ବାଧକ", category: "Mapping" },
+{ from: "ତାଳ", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ତାଳ", to: "କଣ୍ଠସ୍ୱର", category: "Mapping" },
+{ from: "ତାଳ", to: "ବଧୀରତା", category: "Mapping" },
+{ from: "ତାଳ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତାଳ", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ତାଳମୂଳିକନ୍ଦା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତାଳିଶ", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ତାହା", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ଭାଲିଆ ଧୂଆଁ ବାଜି କିମ୍ବା ତାର ରସ ଲାଗି ଦେହରେ ଫୁଲା ଓ ବ୍ରଣ ହେଲେ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ମକଚି ହୋଇ ଜଖମ ହେଲେ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ପେଟରୁ ମଲା ପିଲା ବାହାରିବାକୁ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "କାଶ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ତିନ୍ତୁଳି", to: "ଅଫିମ ଖାଇବା ଅଭ୍ୟାସ ଛାଡ଼ିବା ପାଇଁ", category: "Mapping" },
+{ from: "ତିହୁଡ଼ି", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "ତିହୁଡ଼ି)", to: "ପ୍ରବଳ ଜ୍ୱର", category: "Mapping" },
+{ from: "ତୁତିଆ", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ବାୟା କୁକୁର ଓ ବାୟା ବିଲୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ସର୍ବ ଜ୍ଵରହର", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ପୁରାତନ ଜ୍ଵର", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ପିଲାଙ୍କୁ କେବଳ ଜ୍ଵର ହେଲେ", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ପିଲାଙ୍କର ସର୍ଦ୍ଦି", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ଘଣ୍ଟିକା (ଉପଜିହ୍ନା ରୋଗ)", category: "Mapping" },
+{ from: "ତୁଳସୀ", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "ତେଜ", to: "ଜିହ୍ୱାରୋଗ", category: "Mapping" },
+{ from: "ତେନ୍ତୁଳି", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ତେନ୍ତୁଳି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ତେଲ,", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତୋଟା", to: "କଣ୍ଠସ୍ୱର", category: "Mapping" },
+{ from: "ତୋଟା", to: "ସର୍ଦ୍ଦିକାଶ ଏକାବେଳେ ହେଲେ ଓ ଛାତିରେ କଫ ହେଲେ", category: "Mapping" },
+{ from: "ତୋଳା", to: "କୋଷ୍ଠବଦ୍ଧ", category: "Mapping" },
+{ from: "ତୋଳା", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ତୋଳା", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ତୋଳା", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ତୋଳା", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ତୋଳା", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ତୋଳା ।", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ତୋଳାକୁ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ତ୍ରିଫଳା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ତ୍ରିଫଳା", to: "ଭାଲିଆ ବିଷ", category: "Mapping" },
+{ from: "ତ୍ରିଫଳା", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "ତ୍ରିଫଳାର", to: "ଭାଲିଆ ବିଷ", category: "Mapping" },
+{ from: "ଦକ୍ତି", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ଦନ୍ତ", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ଦନ୍ତୀ", to: "କଟା ଘା", category: "Mapping" },
+{ from: "ଦନ୍ତୀ", to: "ପାଚିଲା ବ୍ରଣ ଫଟାଇବାକୁ", category: "Mapping" },
+{ from: "ଦୟଣା", to: "ପିଲାଙ୍କର କାନ ଟାଣିଲେ", category: "Mapping" },
+{ from: "ଦହିଦହିକା", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "ଦାନ୍ତ", to: "ଦାନ୍ତର ପାଇରିଆ", category: "Mapping" },
+{ from: "ଦାନ୍ତ", to: "କାନକୁଟୁରି ବା କାନରେ ପୋକ", category: "Mapping" },
+{ from: "ଦାନ୍ତ", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ଦାରୁହରିଦ୍ରା", to: "ଜିହ୍ୱାରୋଗ", category: "Mapping" },
+{ from: "ଦାସକରେଣ୍ଟା", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "ଦାସକେରେଣ୍ଟା", to: "ପ୍ରସବ ପରେ ସୂତିକା ରୋଗ ନହେବା ପାଇଁ ସୂତିକା ଦଶମୂଳ କ୍ରାଥ", category: "Mapping" },
+{ from: "ଦାସକେରେଣ୍ଟା", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଦାସକେରେଣ୍ଟା", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ଦାସକେରେଣ୍ଟା", to: "ଅକାରଣରେ ଦାନ୍ତରୁ ରକ୍ତ ବାହାରିଲେ", category: "Mapping" },
+{ from: "ଦାସକେରେଣ୍ଟା", to: "ଗୋଡ଼ ଫଟା", category: "Mapping" },
+{ from: "ଦାସକେରେଷ୍ଟା", to: "ସୂତିକା", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ସର୍ବଜ୍ୱର ହର", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ପିଲାଙ୍କ ଶ୍ବାସ", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ସ୍ତନହରା (ଥନହରା)", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ଗାଲୁଆ", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ମୁଣ୍ଡରୁ ବାଳ ଉପୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ପୁରାତନ ଜ୍ଵର", category: "Mapping" },
+{ from: "ଦୁଦୁରା", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ଦୁଦୁରାମଞ୍ଜି", to: "ସର୍ବଜ୍ୱର ହର", category: "Mapping" },
+{ from: "ଦୁଧରେ", to: "ଅଣ୍ଟାଧରା", category: "Mapping" },
+{ from: "ଦୁଧରେ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଦୁବ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଦୁରାଲାଉ", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଦୁରାଲାଉର", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ଧରଣୀକବାଟ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଧଳାବଚ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଧାଞ୍ଜ", to: "ସୂତିକା ସନ୍ନିପାତ ରୋଗୀ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ଧାତୁକି", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଧାତୁକି", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ଧାରଞ୍ଜ", to: "ସୂତିକା ସନ୍ନିପାତ ରୋଗୀ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ଧୁତୁରା", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଧୁତୁରା", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଧୁତୁରା)", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଧୂଆଁ", to: "ପିଲାଙ୍କ ମୁଣ୍ଡରେ ଘା ବା ବଡ଼ା ହେଲେ", category: "Mapping" },
+{ from: "ଧୂତୁରା", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଧୂତୁରା", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ଧୂତୁରା", to: "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", category: "Mapping" },
+{ from: "ନଡ଼ିଆ", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ନଡ଼ିଆ", to: "କୃଷ୍ଣବର୍ଷ ଦମ୍ପତିର ଗୌରବର୍ଣ ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ନଳିତା", to: "ସ୍ତନ ଦୁଧ ଦୂଷିତ ହେଲେ ବିଶୁଦ୍ଧ କରିବାକୁ", category: "Mapping" },
+{ from: "ନାକଚଣା", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ନାଗେଶ୍ବର", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "ନାଛିକନି", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ନିଗୁଁଷି)", to: "କଫ ଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ", to: "ଅମ୍ଳପିତ୍ତ ( ଅଧୁକ ପାଚନ ରସ ଓ ପିତ୍ତ ନିଃସରଣ )", category: "Mapping" },
+{ from: "ନିମ", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "କୃଷ୍ଣ ରୋଗ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ବାତପୈତ୍ତିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ନାଭି ଫୁଲିଲେ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପଦ୍ମକଣ୍ଟା (ଶରୀର ଉପରେ ବା ଭିତରେ ଭାତୁଡ଼ି ପରି ଆବୁ)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ଅଙ୍କୁଶ କୃମି", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପିଲାଙ୍କର ଜାକୃସି ରୋଗ (ଗୁଦବ୍ରଣ)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "କୋଚିଲା ବିଷ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପିଲାଙ୍କୁ କେବଳ ଜ୍ଵର ହେଲେ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ପଠା ଘା", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "କଣ୍ଡୁ (ବଡ଼ବଡ଼ ଘିମିରି ହେଇ କୁଣ୍ଡାଇ  ହେବା)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ଜ୍ୱରରେ ଧୂପ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ନାଳୀ ଘା (ଶୀରା ବା ଅସ୍ଥି ମଧ୍ୟରେ ଥିବା ସଂକୀର୍ଣ ମାର୍ଗରେ ହୋଇଥିବା କ୍ଷତ)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "କଫ ଜ୍ୱର", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ନିମ୍ବ", to: "ବିସର୍ପ ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ନିମ୍ବଗଛ", to: "କୃଷ୍ଣ ରୋଗ", category: "Mapping" },
+{ from: "ନିମ୍ବଛେଲି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ନିମ୍ବଛେଲି", to: "କୋଚିଲା ବିଷ", category: "Mapping" },
+{ from: "ନିମ୍ବଛେଲିର", to: "କୋଚିଲା ବିଷ", category: "Mapping" },
+{ from: "ନିମ୍ବଛେଲିର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ନିୟ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ନିର୍", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ନିର୍", to: "ଅର୍ଶବଳି", category: "Mapping" },
+{ from: "ନିର୍ଗୁଣ୍ଡି)", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ନିଶାଦଳ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ନେଳୀ", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ପକାଇବ ।", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ପଞ୍ଚାଙ୍ଗର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ପଡ଼ିଥିବା", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ପଥର", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ପଥର", to: "ଆବୁ", category: "Mapping" },
+{ from: "ପଥର)", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ପଦ୍ମ", to: "ମଳଦ୍ଵାର ବାହାରି ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "ପଦ୍ମ", to: "ପଦ୍ମକଣ୍ଟା (ଶରୀର ଉପରେ ବା ଭିତରେ ଭାତୁଡ଼ି ପରି ଆବୁ)", category: "Mapping" },
+{ from: "ପଦ୍ମ", to: "ମଳକଣ୍ଟକ", category: "Mapping" },
+{ from: "ପଦ୍ମର", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ପରାଗକୁ", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ପଲାଶ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ପଲାଶ", to: "ସହବାସ ଓ ଗର୍ଭାବସ୍ଥା", category: "Mapping" },
+{ from: "ପଲାଶ", to: "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ପଲାଶ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ପଲାସ", to: "ଅଙ୍କୁଶ କୃମି", category: "Mapping" },
+{ from: "ପଳାଶ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ପସାରୁଣି", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ପସାରୁଣୀ", to: "ଅଣ୍ଟାଧରା", category: "Mapping" },
+{ from: "ପାଉଁଶିଆ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ପାଚିଲା", to: "ପିଲାଙ୍କ କୃମି", category: "Mapping" },
+{ from: "ପାଟଳୀ", to: "ଅଗ୍ନି ଦଗ୍ଧ", category: "Mapping" },
+{ from: "ପାତାଳଗରୁଡ଼", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ପାତାଳଗରୁଡ଼", to: "ରକ୍ତଚାପ (ଉଚ୍ଚ)", category: "Mapping" },
+{ from: "ପାତାଳଗରୁଡ଼", to: "ପାଗଳ ରୋଗ", category: "Mapping" },
+{ from: "ପାନ", to: "ଅନ୍ଧାରକଣା", category: "Mapping" },
+{ from: "ପାନ", to: "ଜ୍ଵର - (ବିଭିନ୍ନ ପ୍ରକାର)", category: "Mapping" },
+{ from: "ପାନ", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "ପାନ", to: "ପିଲାଙ୍କର କାନ ଟାଣିଲେ", category: "Mapping" },
+{ from: "ପାନ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ପାନ", to: "ଗଳାକ୍ଷତ", category: "Mapping" },
+{ from: "ପାନ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ପାନ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ପାନ", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ପାନ", to: "ପିଲାଙ୍କ ପେଟ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ପାରିଲେ", to: "ପିଲାଙ୍କର ଅଳତି ରୋଗ", category: "Mapping" },
+{ from: "ପାଳଧୂଆ", to: "କର୍ଣ୍ଣମୂଳ ଶୋଥ", category: "Mapping" },
+{ from: "ପାଳଧୂଆ", to: "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", category: "Mapping" },
+{ from: "ପାଳଧୂଆ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ପିଆଇବ !", to: "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", category: "Mapping" },
+{ from: "ପିଆଶାଳ", to: "ପିଲାଙ୍କର ଜାକୃସି ରୋଗ (ଗୁଦବ୍ରଣ)", category: "Mapping" },
+{ from: "ପିଚୁମର୍ଭ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ପିଜୁଳି", to: "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", category: "Mapping" },
+{ from: "ପିପ୍ପଳ", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ପିପ୍ପଳ", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ସର୍ବଜ୍ୱର ହର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "କଫ", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ବ୍ୟାଧିହରଣ", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ସନ୍ନିପାତ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "କଫ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "କାଶ", category: "Mapping" },
+{ from: "ପିପ୍ପଳୀ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ପୁନରପି", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ପୁରୁଣି", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ପୁରୁଣି)", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ପୁରୁଣୀ", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ପୁରୁଣୀ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ପୁଷ୍କର", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ପେଡ଼ିପେଡ଼ିକା", to: "କାମଳ", category: "Mapping" },
+{ from: "ପେଡ଼ିପେଡ଼ିକିଆ", to: "ପ୍ରସବ ପରେ ଫୁଲ ପଡ଼ିବାକୁ", category: "Mapping" },
+{ from: "ପେଣୁ)", to: "ଦ୍ୱାହିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋକଶୁଘା", to: "ବିଇଞ୍ଚି (ଏଜିମା)", category: "Mapping" },
+{ from: "ପୋକଶୁଘା", to: "କୋଷ୍ଠବଦ୍ଧ", category: "Mapping" },
+{ from: "ପୋକଶୁଘା", to: "ଚର୍ମ ଉକୁଣୀ", category: "Mapping" },
+{ from: "ପୋକଶୁଘା", to: "କାନକୁଟୁରି ବା କାନରେ ପୋକ", category: "Mapping" },
+{ from: "ପୋକଶୁଘା", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ପୋକଶୁଙ୍ଗା", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ପୋକସୁଂଘା", to: "ଅଶୁଦ୍ଧ ପାରା ଖାଇବାର କ୍ଷତିକାରକ ପ୍ରଭାବ", category: "Mapping" },
+{ from: "ପୋକସୁଙ୍ଗା", to: "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋକସୁନ୍ଦା", to: "ଋତୁଶୂଳ ବା ବାଧକ", category: "Mapping" },
+{ from: "ପୋକସୁନ୍ଦା", to: "ପିଲାଙ୍କର କୋଷ୍ଠବଦ୍ଧ ହେଲେ", category: "Mapping" },
+{ from: "ପୋକସୁଫା", to: "ବାଲିଜନ୍ଦା ଓ ପାଣିଖିଆ", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ପିଲାଙ୍କୁ କେବଳ ଜ୍ଵର ହେଲେ", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ଅମ୍ଳପିତ୍ତ ( ଅଧୁକ ପାଚନ ରସ ଓ ପିତ୍ତ ନିଃସରଣ )", category: "Mapping" },
+{ from: "ପୋଟଳ", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋଟଳ ।", to: "ବାତପୈତ୍ତିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପୋସ୍ତକଦାନାର", to: "ମସ୍ତିଷ୍କ ଦୁର୍ବଳତା", category: "Mapping" },
+{ from: "ପ୍ରତ୍ୟେକର", to: "କଫ ଜ୍ୱର", category: "Mapping" },
+{ from: "ପ୍ରତ୍ୟେକର", to: "ଅମ୍ଳପିତ୍ତ ( ଅଧୁକ ପାଚନ ରସ ଓ ପିତ୍ତ ନିଃସରଣ )", category: "Mapping" },
+{ from: "ପ୍ରଭୃତି", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ପ୍ରିୟଙ୍ଗୁ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଫଣଫଣା", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ଫଣଫଣା", to: "ଗାଲୁଆ", category: "Mapping" },
+{ from: "ଫଣଫଣା", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ଫଳ", to: "ପିଲାଙ୍କ ଦେହ ମୋଡ଼ି ହେଲେ", category: "Mapping" },
+{ from: "ଫଳ,", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଫଳ,", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଫଳ,", to: "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", category: "Mapping" },
+{ from: "ଫଳର", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ଫଳର", to: "ଗଳା କ୍ୟାନସର୍", category: "Mapping" },
+{ from: "ଫଳରେ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଫିଟିକିରି", to: "ନାକରୁ ରକ୍ତ ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଫିଟିକିରିକୁ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ବଂଶଲୋଚନା", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ବଉଳ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ବଉଳ", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ବଉଳ", to: "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", category: "Mapping" },
+{ from: "ବଉଳକୋଳି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ବଚ", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ବଚ", to: "ରକ୍ତଚାପ (ଉଚ୍ଚ)", category: "Mapping" },
+{ from: "ବଚ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ସ୍ତନ ଦୁଧ ଦୂଷିତ ହେଲେ ବିଶୁଦ୍ଧ କରିବାକୁ", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", category: "Mapping" },
+{ from: "ବଜ୍ର", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ବଜ୍ରମୂଳି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ବଜ୍ରମୂଳୀର", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ବତୁରାଇ", to: "ଲିଙ୍ଗରୁ ରକ୍ତ ସ୍ରାବ", category: "Mapping" },
+{ from: "ବୟସର", to: "ପିତ୍ତ ପଥୁରି (ପିତ୍ତକୋଷଶିଳା)", category: "Mapping" },
+{ from: "ବର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବର", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ବର", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ବର", to: "ପିଲାଙ୍କ ମୁଣ୍ଡରେ ଘା ବା ବଡ଼ା ହେଲେ", category: "Mapping" },
+{ from: "ବର", to: "ଆବୁ", category: "Mapping" },
+{ from: "ବର", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ବର", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ରକ୍ତାତିସାର (ରକ୍ତଝାଡା)", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ପାଗଳ ରୋଗ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ହାତ-ପାଦ ଜ୍ୱାଳା", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ମୋଟା ହୋଇଯିବା ରୋଗ (ମେଦ ରୋଗ ବା ସ୍ଥୌଲ୍ୟ ରୋଗ)", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ସ୍ବରଭଙ୍ଗ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ବିସର୍ପ ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ମୁଣ୍ଡ ବୁଲାଇହେଲେ", category: "Mapping" },
+{ from: "ବରକୋଳି", to: "ମିଳିମିଳା", category: "Mapping" },
+{ from: "ବରକୋଳିର", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ବରୁଣ", to: "ମୁହଁର କଳାଦାଗ", category: "Mapping" },
+{ from: "ବରୁଣ", to: "ନାକର ହାଡ଼ରେ ବ୍ରଣ ହେଲେ", category: "Mapping" },
+{ from: "ବରୁଣ", to: "ଗଣ୍ଡମାଳା", category: "Mapping" },
+{ from: "ବରୁଣ", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ବସାଇ", to: "ଆଖିର ପରଳ", category: "Mapping" },
+{ from: "ବସେବତୀ", to: "ପିଲାଙ୍କ ନାଳ ଝାଡ଼ା ଓ ନାଳରକ୍ତ ଝାଡ଼ା", category: "Mapping" },
+{ from: "ବାଇଗଣ", to: "ଅଫିମ ବିଷ", category: "Mapping" },
+{ from: "ବାଇଗବା", to: "ଦାନ୍ତ ଟାଣହେବାକୁ", category: "Mapping" },
+{ from: "ବାଇଗବାର", to: "ଦାନ୍ତ ଟାଣହେବାକୁ", category: "Mapping" },
+{ from: "ବାଇଡ଼ଙ୍କ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବାଇଡ଼ଙ୍କ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ବାଇଡ଼ଙ୍କ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ବାଇଡ଼ଙ୍କ", to: "ଲିଙ୍ଗରୁ ରକ୍ତ ସ୍ରାବ", category: "Mapping" },
+{ from: "ବାଇଡ଼ଙ୍ଗ", to: "ଲିଙ୍ଗରୁ ରକ୍ତ ସ୍ରାବ", category: "Mapping" },
+{ from: "ବାଉଁଶ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ବାଉଁଶ", to: "ଜ୍ୱରରେ ବାମ୍ଫ", category: "Mapping" },
+{ from: "ବାଡ଼ିଅଁଳା", to: "ଜିହ୍ୱାରୋଗ", category: "Mapping" },
+{ from: "ବାଡ଼ିଅଁଳା", to: "ପିଲାଙ୍କୁ ପାଟି ଭିତରେ, ଜିଭରେ ଓ ଓଠରେ ଘା ହେଲେ", category: "Mapping" },
+{ from: "ବାଡ଼ିଅଁଳା", to: "ମୂର୍ଚ୍ଛା", category: "Mapping" },
+{ from: "ବାଦିଚାଙ୍ଗ", to: "ବାୟା କୁକୁର ଓ ବାୟା ବିଲୁଆ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "କୃଷ୍ଣବର୍ଷ ଦମ୍ପତିର ଗୌରବର୍ଣ ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବାବୁଲ", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "ବାଳର", to: "ମୁଣ୍ଡରୁ ବାଳ ଉପୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ବାଳଶିମୁଳୀକନ୍ଦା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବାସଙ୍", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପିଲାଙ୍କ ଶ୍ବାସ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ନାକର ସମସ୍ତ ରୋଗ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଦାନ୍ତ ହଲିଲେ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପିଲାଙ୍କର କାଶ ହେଲେ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "କାଶ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପେଟରୁ ମଲା ପିଲା ବାହାରିବାକୁ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ପ୍ରସବ ପରେ ସୂତିକା ରୋଗ ନହେବା ପାଇଁ ସୂତିକା ଦଶମୂଳ କ୍ରାଥ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗ", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ବାସଙ୍ଗଛାଲି", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାସଙ୍ଗଛାଲିର", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାସଙ୍ଗର", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ବାହାଡ଼ା", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ବାହାଡ଼ାର", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ବିଚର", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ବିଛୁଆତି", to: "ଚନ୍ଦାମୁଣ୍ଡରେ ବାଳ ଉଠିବାକୁ", category: "Mapping" },
+{ from: "ବିଡ଼ଙ୍ଗ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ବିର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବୁଢ଼ା", to: "ପିତ୍ତ ପଥୁରି (ପିତ୍ତକୋଷଶିଳା)", category: "Mapping" },
+{ from: "ବୃକରି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ବୃଦ୍ଧଦାରକ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ବୃଦ୍ଧଦାରକ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ବୃଦ୍ଧଦାରକ", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "ବୃଦ୍ଧଦାରକର", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ବୃହତୀ)", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "କୃଷ୍ଣ ରୋଗ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "ଜ୍ୱରରେ ବାମ୍ଫ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "ପ୍ଲୁରିସି", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "କାଶ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ବେଗୁନିଆ", to: "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", category: "Mapping" },
+{ from: "ବେଗୁନିଆ)", to: "ଘା ରେ ପୋକ ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "ବେଗୁନିଆର", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ବେଗୁନିଆର", to: "(ପୂତିକର୍ଣ୍ଣ) କାନରୁ ପୂଯ ବାହାରିବା", category: "Mapping" },
+{ from: "ବେଣା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ବେଣା", to: "ଜ୍ଵର - (ବିଭିନ୍ନ ପ୍ରକାର)", category: "Mapping" },
+{ from: "ବେଣା", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ବେଣା", to: "ବାତପୈତ୍ତିକ ଜ୍ୱର", category: "Mapping" },
+{ from: "ବେଣା", to: "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", category: "Mapping" },
+{ from: "ବେଣା", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ବେଲ", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ବେଲ", to: "ସୂତିକା", category: "Mapping" },
+{ from: "ବେଲ", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ବେଲ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ବେଲ", to: "ପ୍ରସବ ବା ଗର୍ଭପାତ ପରେ ବେଶି ରକ୍ତସ୍ରାବ ହେଉଥିଲେ", category: "Mapping" },
+{ from: "ବେଲ", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ବେଲ", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ବେଲ", to: "ସ୍ତନହରା (ଥନହରା)", category: "Mapping" },
+{ from: "ବେଲମୂଳର", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ଭାଗରେ", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଭାଗରେ", to: "ପିଲାଙ୍କ ଶ୍ବାସ", category: "Mapping" },
+{ from: "ଭାଜି", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ଭାଜି", to: "ପରିସ୍ରା ବେଶି ହେଲେ", category: "Mapping" },
+{ from: "ଭୁଇଁଅଁଳା", to: "ସ୍ବରଭଙ୍ଗ", category: "Mapping" },
+{ from: "ଭୁଇଁଅଳା", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଭୁଜ", to: "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", category: "Mapping" },
+{ from: "ଭୂଇଁଅଳା", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଭୂଇଁକଦମ୍ବ", to: "ଉପଦଂଶ (ସିଫିଲିସ୍)", category: "Mapping" },
+{ from: "ମଖମଲି)", to: "ପିଲାଙ୍କର ମୂତ ବନ୍ଦ ହେଲେ", category: "Mapping" },
+{ from: "ମଞ୍ଚୁଆତି", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ମଞ୍ଚୁଆତି", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ମଞ୍ଚୁଆତି", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ମଞ୍ଚୁଆତି", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ମଞ୍ଚୁଆତି)", to: "କୋଷ୍ଠବଦ୍ଧ", category: "Mapping" },
+{ from: "ମଞ୍ଜୁଆତି", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ମଞ୍ଜୁଆତି", to: "କାମଳ", category: "Mapping" },
+{ from: "ମଞ୍ଜୁଆତି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମଣିଲଇ", to: "ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ମତେ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ମଧବୟସ", to: "ପିତ୍ତ ପଥୁରି (ପିତ୍ତକୋଷଶିଳା)", category: "Mapping" },
+{ from: "ମଧ୍ୟ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ମନଃଶିଳା", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ପୁଷ୍ପବତୀ ହେବାକୁ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ମୁଣ୍ଡର ବାଳ ବଢ଼ିବାକୁ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", category: "Mapping" },
+{ from: "ମନ୍ଦାର", to: "ଚନ୍ଦାମୁଣ୍ଡରେ ବାଳ ଉଠିବାକୁ", category: "Mapping" },
+{ from: "ମନ୍ଦି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମନ୍ଦିର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମୟୁରଚୂଳିଆ", to: "କଣ୍ଠସ୍ୱର", category: "Mapping" },
+{ from: "ମରିଚ", to: "ଆମାତିସାର (ନାଳ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ମରିଚ", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ମରିଚର", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ମଲ୍ଲୀ", to: "ନଖ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ମଲ୍ଲୀ", to: "ମଳକଣ୍ଟକ", category: "Mapping" },
+{ from: "ମଲ୍ଲୀ", to: "ସ୍ତନହରା (ଥନହରା)", category: "Mapping" },
+{ from: "ମଲ୍ଲୀଗଛର", to: "ନଖ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ମହୁ", to: "ଗର୍ଭଣୀର ସ୍ତନରେ କଣ୍ଡୁ ହେଲେ", category: "Mapping" },
+{ from: "ମହୁର", to: "ଗର୍ଭଣୀର ସ୍ତନରେ କଣ୍ଡୁ ହେଲେ", category: "Mapping" },
+{ from: "ମାଣସାରୁ", to: "ଆବୁ", category: "Mapping" },
+{ from: "ମାରୀ)", to: "ପିଲାଙ୍କ କୃମି", category: "Mapping" },
+{ from: "ମାଳତୀ", to: "ଅତି ପ୍ରସବ ହେତୁ ପେଟ ବଢ଼ିଲେ", category: "Mapping" },
+{ from: "ମାଳତୀ", to: "ଗର୍ଭଣୀର ସ୍ତନରେ କଣ୍ଡୁ ହେଲେ", category: "Mapping" },
+{ from: "ମିଶ୍ର", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ମିଶ୍ର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମିଶ୍ରି", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ମୁକା (", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ମୁଚକୁନ୍ଦ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ମୁଚୁକୁନ୍ଦ", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ମୁଚୁକୁନ୍ଦ", to: "ଅନିଦ୍ରା", category: "Mapping" },
+{ from: "ମୁଣ୍ଡବାଳ", to: "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୁତୁରୀ", to: "ପିଲାମାନେ ବିଛଣାରେ ମୁତିଲେ", category: "Mapping" },
+{ from: "ମୁତୁରୀ", to: "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", category: "Mapping" },
+{ from: "ମୁଥା", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୁଥା", to: "ସନ୍ନିପାତ ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୁଥାର", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୁଥାର", to: "ବାନ୍ତି", category: "Mapping" },
+{ from: "ମୁଥାର", to: "ସନ୍ନିପାତ ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୁର୍ଗା", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ମୁର୍ବା", to: "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", category: "Mapping" },
+{ from: "ମୂଳା", to: "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", category: "Mapping" },
+{ from: "ମୂଳା", to: "ପିଲାଙ୍କ ଶ୍ବାସ", category: "Mapping" },
+{ from: "ମୂଳା", to: "ବୟସ ଛଉ", category: "Mapping" },
+{ from: "ମୂଳା", to: "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", category: "Mapping" },
+{ from: "ମୂଷାକାନି", to: "ବାଛରା ଝାଡ଼ା", category: "Mapping" },
+{ from: "ମୋଟ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ମୋଟ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ମୋଡ଼ମୋଡ଼ିଆ", to: "ପିଲାଙ୍କ ଦେହ ମୋଡ଼ି ହେଲେ", category: "Mapping" },
+{ from: "ଯହିଁରେ", to: "ମୁଣ୍ଡ ବୁଲାଇହେଲେ", category: "Mapping" },
+{ from: "ଯାଠିମଧୁ", to: "ସହବାସ ପରେ କେତେକ ଉପାଦେୟ ସାଧାରଣ ନିୟମ", category: "Mapping" },
+{ from: "ଯାଷ୍ଟିମଧୁ)", to: "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", category: "Mapping" },
+{ from: "ରକ୍ତଚନ୍ଦନ", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ରକ୍ତଚନ୍ଦନର", to: "ପିତ୍ତଜ୍ୱର", category: "Mapping" },
+{ from: "ରଖି", to: "ଦାନ୍ତର ପାଇରିଆ", category: "Mapping" },
+{ from: "ରଖିବ ।", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ରଙ୍ଗକୋଳଥିଆ", to: "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", category: "Mapping" },
+{ from: "ରଙ୍ଗବାଣ", to: "ମଳକଣ୍ଟକ", category: "Mapping" },
+{ from: "ରସ (", to: "କଫ", category: "Mapping" },
+{ from: "ରାସ୍ନା", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ରାସ୍ନାମୂଳ", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଲଙ୍କାକାଲ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଲଙ୍କାଜଡ଼ା", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ଲଙ୍କାଜଡ଼ାର", to: "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", category: "Mapping" },
+{ from: "ଲବଙ୍ଗ (", to: "ମିଳିମିଳା", category: "Mapping" },
+{ from: "ଲବଣ", to: "ପିଲାଙ୍କର ହୁପିଙ୍ଗ୍ କଫ ବା କୁକୁର କାଶ", category: "Mapping" },
+{ from: "ଲବଣ", to: "ଆଖିରେ ମୋତିଆବିନ୍ଦୁ", category: "Mapping" },
+{ from: "ଲବେଙ୍କୁଡ଼ି", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଲବେଙ୍କୁଡ଼ି)", to: "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", category: "Mapping" },
+{ from: "ଲାଗି", to: "ଭାଲିଆ ବିଷ", category: "Mapping" },
+{ from: "ଲାଜକୁଳୀ", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ଲାଲବର୍ଣ ।", to: "ଆଖି ରକ୍ତବର୍ଣ୍ଣ ଦିଶିଲେ", category: "Mapping" },
+{ from: "ଲୁଣଲୁଣିକା", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଲୁଣିଲୁଣିକା", to: "ମୃତବତ୍ସା ((ଯେଉଁ ମା'ର ପିଲା ପେଟରୁ ମରିକରି ଜନ୍ମହେଲେ କିମ୍ବା ଜନ୍ମର ୨ ବର୍ଷ ଭିତରେ ମରିଯାଉଥିଲେ )", category: "Mapping" },
+{ from: "ଲୁଣିଲୁଣିକା", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଲେଉଟିଆ", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଲେମ୍ବୁ", to: "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", category: "Mapping" },
+{ from: "ଶଙ୍ଖଜୀରକ", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ଶତ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଶତାବରୀ", to: "ସ୍ତ୍ରୀ ରୋଗ (ଯାବତୀୟ ସ୍ତ୍ରୀ ରୋଗ)", category: "Mapping" },
+{ from: "ଶତାବରୀ", to: "ସ୍ଵପ୍ନଦୋଷ", category: "Mapping" },
+{ from: "ଶମୀ", to: "ପୁରାତନ ଜ୍ଵର", category: "Mapping" },
+{ from: "ଶରପୁଖ୍ୟ", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "ଶରପୁଖ୍ୟ", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ଶରପୁଖ୍ୟ)", to: "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଶରପୁଖ୍ୟା)", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ଶରପୁଙ୍ଖା", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ଶରପୁଙ୍ଖାର", to: "ଆଖିରେ ମୋତିଆବିନ୍ଦୁ", category: "Mapping" },
+{ from: "ଶରୀରଶୋଧନ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶାଗ", to: "ଗଳାକ୍ଷତ", category: "Mapping" },
+{ from: "ଶାଳ", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ଶିତୋପଳାଦି", to: "ଆନ୍ତ୍ରିକ ଜ୍ଵର", category: "Mapping" },
+{ from: "ଶିମିଳି", to: "ବହୁମୂତ୍ର (ମଧୁମେହ)", category: "Mapping" },
+{ from: "ଶିମୁଳି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିମୁଳି", to: "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", category: "Mapping" },
+{ from: "ଶିମୁଳି", to: "ମୁହଁର କଳାଦାଗ", category: "Mapping" },
+{ from: "ଶିମୁଳିଗଛର", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିମୂଳି", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିମୂଳି)", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିମୂଳୀ", to: "ନପୁଂସକତା ", category: "Mapping" },
+{ from: "ଶିମୂଳୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିମୂଳୀ", to: "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", category: "Mapping" },
+{ from: "ଶିମ୍ବ", to: "ପଠା ଘା", category: "Mapping" },
+{ from: "ଶିରିଷ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ଶିରୀଷ", to: "ସନ୍ନିପାତ ଜ୍ୱର", category: "Mapping" },
+{ from: "ଶୁଘା", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ଶୁଣୀ", to: "ସର୍ବଜ୍ୱର ହର", category: "Mapping" },
+{ from: "ଶୁଣ୍", to: "ଶୋଥ", category: "Mapping" },
+{ from: "ଶୁଣ୍", to: "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ଶ୍ଵାସ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ସ୍ବରଭଙ୍ଗ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ସ୍ତ୍ରୀ ରୋଗ (ଯାବତୀୟ ସ୍ତ୍ରୀ ରୋଗ)", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡି", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡିର", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ଶୁଣ୍ଡିର", to: "ହୃଦ୍‌ରୋଗ", category: "Mapping" },
+{ from: "ଶୁଷ୍ଠୀ", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ଶୁଷ୍ଠୀ", to: "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", category: "Mapping" },
+{ from: "ଶୁଷ୍ଠୀର", to: "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", category: "Mapping" },
+{ from: "ଶୂଳାନ୍ତକ", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "ଶ୍ରୀକର୍ପୂର", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ଶ୍ୱେତପୁରୁଣୀ", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ଶ୍ଵେତକାଇଁଚ", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ଶ୍ଵେତଝୁଣା", to: "ଦୂଷିତ ଘା", category: "Mapping" },
+{ from: "ଶ୍ଵେତପୁରୁଣି", to: "ଆଖିର ଫୁଲା ରୋଗ", category: "Mapping" },
+{ from: "ସଜନା", to: "ବିଇଞ୍ଚି (ଏଜିମା)", category: "Mapping" },
+{ from: "ସଜନା", to: "ଚକ୍ଷୁରୋଗ", category: "Mapping" },
+{ from: "ସଜନା", to: "ଆଖି ରକ୍ତବର୍ଣ୍ଣ ଦିଶିଲେ", category: "Mapping" },
+{ from: "ସଜନା", to: "ପେଟବ୍ୟଥା (ଶୂଳ)", category: "Mapping" },
+{ from: "ସଜନା", to: "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", category: "Mapping" },
+{ from: "ସଜନା", to: "ଅନ୍ତର୍ବିଦ୍ରଧୀ (ପେଟ ଭିତର ବ୍ରଣ ବା କ୍ୟାନ୍ସର)", category: "Mapping" },
+{ from: "ସଜନା", to: "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", category: "Mapping" },
+{ from: "ସଜନା", to: "ମୁଣ୍ଡବ୍ୟଥା", category: "Mapping" },
+{ from: "ସଜନା", to: "ପେଟରୁ ମଲା ପିଲା ବାହାରିବାକୁ", category: "Mapping" },
+{ from: "ସଜନା", to: "ହରପିସ୍ (ମାଙ୍କଡ଼ସା ମୂତିବା ରୋଗ)", category: "Mapping" },
+{ from: "ସପୁରୀ", to: "ପିଲାଙ୍କ କୃମି", category: "Mapping" },
+{ from: "ସପ୍ତପୂର୍ଣ)", to: "ଘା ଶୁଖିବା ପାଇଁ", category: "Mapping" },
+{ from: "ସାହାଡ଼ା", to: "ଜ୍ୱରରେ ବାମ୍ଫ", category: "Mapping" },
+{ from: "ସାହାଡ଼ା", to: "ବିଇଞ୍ଚି (ଏଜିମା)", category: "Mapping" },
+{ from: "ସିଖୁ", to: "ଜଳୋଦର ଓ ଉଦର ରୋଗ", category: "Mapping" },
+{ from: "ସିଝୁ", to: "ମ୍ୟାଲେରିଆ ଜ୍ୱର", category: "Mapping" },
+{ from: "ସିଝୁ", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ସିଝୁର", to: "ଭଗନ୍ଦର", category: "Mapping" },
+{ from: "ସିତୋପଳାଦି", to: "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ବାଗି (ପିଛୁଳି -ଜଙ୍ଘସନ୍ଧିରେ ଗ୍ରଛି ଫୁଲା)", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "କାଖଗୁଲି", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ବିସର୍ପ ମୁଖବ୍ରଣ", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ପଠା ଘା", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ସୂତିକା ସନ୍ନିପାତ ରୋଗୀ ମରିଯାଉଥିଲେ", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ପବକାଣ୍ଡ (ବେଢ଼ାଆଙ୍ଗୁଳି)", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ନାଳୀ ଘା (ଶୀରା ବା ଅସ୍ଥି ମଧ୍ୟରେ ଥିବା ସଂକୀର୍ଣ ମାର୍ଗରେ ହୋଇଥିବା କ୍ଷତ)", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ବ୍ରଣ", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "ଘା ରେ ପୋକ ପଡ଼ିଲେ", category: "Mapping" },
+{ from: "ସୀତାଫଳ", to: "କଣନଖା ( ହାତ ବା ଗୋଡ ଆଙ୍ଗୁଠି ନଖ କୋଣ ପାଚି ଯନ୍ତ୍ରଣା ହେବା )", category: "Mapping" },
+{ from: "ସୁନାମୁଖୀ", to: "ଅଗିଆବାତ (ଦେହ କୁଣ୍ଡାଇ ହୋଇ ଚକାଚକା ହୋଇ ଫଳିଯିବା)", category: "Mapping" },
+{ from: "ସୁନାରି", to: "ପୁଷ୍ପବତୀ ହେବାକୁ", category: "Mapping" },
+{ from: "ସୁନାରି", to: "ପଦ୍ମକଣ୍ଟା (ଶରୀର ଉପରେ ବା ଭିତରେ ଭାତୁଡ଼ି ପରି ଆବୁ)", category: "Mapping" },
+{ from: "ସୁନାରି", to: "ସ୍ତନହରା (ଥନହରା)", category: "Mapping" },
+{ from: "ସୁନାରୀ", to: "ବିଇଞ୍ଚି (ଏଜିମା)", category: "Mapping" },
+{ from: "ସୁପୁଷ୍ପ,", to: "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", category: "Mapping" },
+{ from: "ସୁରମା", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ସୂକ୍ଷ୍ମ", to: "ସୁଖ ପ୍ରସବ", category: "Mapping" },
+{ from: "ସେବତୀ", to: "ହରିତାଳ ବିଷ", category: "Mapping" },
+{ from: "ସେବତୀ)", to: "କଟା ଘା", category: "Mapping" },
+{ from: "ସେବତୀ)", to: "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", category: "Mapping" },
+{ from: "ସେମାରାଜ", to: "ବଧୀରତା", category: "Mapping" },
+{ from: "ସୋମରାଜ", to: "ଧବଳ କୁଷ୍ଠ", category: "Mapping" },
+{ from: "ସୋମରାଜ", to: "କାଛୁ କୁଣ୍ଡିଆ", category: "Mapping" },
+{ from: "ସୋରିଷା", to: "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", category: "Mapping" },
+{ from: "ହରିଡ଼ା", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ହରିଡ଼ା", to: "ଅର୍ଶ", category: "Mapping" },
+{ from: "ହରିଡ଼ା", to: "ଗୁଳ୍ମ", category: "Mapping" },
+{ from: "ହରିଡ଼ା", to: "ବସନ୍ତ", category: "Mapping" },
+{ from: "ହରିଡ଼ା", to: "ଅମ୍ଳପିତ୍ତ ( ଅଧୁକ ପାଚନ ରସ ଓ ପିତ୍ତ ନିଃସରଣ )", category: "Mapping" },
+{ from: "ହରିଡ଼ା, (", to: "ଅଜୀର୍ଣ୍ଣ", category: "Mapping" },
+{ from: "ହରିଡ଼ାର", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ହରିହରିକା", to: "ସ୍ତନରେ ଦୁଧ ହେବାକୁ", category: "Mapping" },
+{ from: "ହଳଦିଆ,", to: "ପିଲାଙ୍କର ଅଳତି ରୋଗ", category: "Mapping" },
+{ from: "ହଳଦୀ", to: "ହିକ୍କା", category: "Mapping" },
+{ from: "ହଳଦୀ", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ହଳଦୀ", to: "ପ୍ରମେହ", category: "Mapping" },
+{ from: "ହଳଦୀବର", to: "ସୂତିକା", category: "Mapping" },
+{ from: "ହସ୍ତୀଶୁଣ୍ଠି", to: "ଜଳାତଙ୍କ", category: "Mapping" },
+{ from: "ହାଡ଼ଭଙ୍ଗା", to: "ହାଡ଼ ଭାଙ୍ଗିଲେ", category: "Mapping" },
+{ from: "ହାଡ଼ର", to: "ପିଲାଙ୍କ ରୋହିଣୀ, ଘଣ୍ଟିକା, ଗଳକ୍ଷତ", category: "Mapping" },
+{ from: "ହାତୀଦାନ୍ତକୁ", to: "ଚନ୍ଦାମୁଣ୍ଡରେ ବାଳ ଉଠିବାକୁ", category: "Mapping" },
+{ from: "ହିଞ୍ଜଳ", to: "ପେଟଫମ୍ପା", category: "Mapping" },
+{ from: "ହେମକାକରି,", to: "ବାଛରା ଝାଡ଼ା", category: "Mapping" },
+{ from: "ହେମକେଦାର", to: "କଲେରା (ବିସୂଚିକା)", category: "Mapping" },
+{ from: "ହେମସାଗର", to: "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", category: "Mapping" },
+{ from: "ହେମସାଗର,", to: "କଲେରା (ବିସୂଚିକା)", category: "Mapping" },
+
+      ];
+      //</AddSwarup>
+
+
+      /* // <CommentSwarup>
+      // initialize tree on left side 
+      var root = { key: "element", group: -1 };
+      nodeDataArray.push(root);
+      for (var i = 0; i < 11;) {
+        i = makeTree(0, i, 17, nodeDataArray, linkDataArray, root, -1, root.key);
+      }
+
+      // initialize tree on right side
+      root = { key: "disease", group: -2 };
+      nodeDataArray.push(root);
+      for (var i = 0; i < 15;) {
+        i = makeTree(0, i, 15, nodeDataArray, linkDataArray, root, -2, root.key);
+      } // </CommentSwarup>
+      */
+
+      //<AddSwarup>
+      // left tree
+      var elements = ["ଅଁଳା", "ଅଁଳା)", "ଅଁଳାକୁ", "ଅଁଳାର", "ଅଁଳାରୁ", "ଅକରକରା", "ଅକାନବିନ୍ଧି", "ଅକାନବିନ୍ଧିର", "ଅକାନବିନ୍ଧୀ", "ଅଗରା", "ଅଗସ୍ତି", "ଅଗସ୍ତିପତ୍ର", "ଅଗି", "ଅଗିବଥୁ", "ଅଙ୍କରାନ୍ତି", "ଅଣସୋରିଷା", "ଅଧତୋଳା", "ଅଧଭରିକୁ", "ଅଧୁକା", "ଅନନ୍ତ", "ଅପମାରଙ୍ଗ", "ଅପମାର୍ଗ", "ଅପରାଜିତା", "ଅପରାଜିତାର", "ଅପାମାରଙ୍ଗ", "ଅପାମାରଙ୍ଗ)", "ଅପାମାର୍ଗ", "ଅମରପୋଇ", "ଅମୃତଭଣ୍ଡା", "ଅରଖ", "ଅରଖ ।", "ଅରଖଗଛ", "ଅରଖମ୍ବଳ", "ଅରଖି", "ଅରଖିଛାଲି", "ଅର୍ଜ", "ଅର୍ଜୁନ", "ଅର୍ଜୁନଛାଲି", "ଅର୍ଜୁନଛାଲିର", "ଅର୍ଥାତ୍", "ଅଲଗା", "ଅଳେଇଚ", "ଅଳେଇଚର", "ଅଶୋକ", "ଅଶୋକପତ୍ର", "ଅଶୋକପତ୍ରର", "ଅଶ୍ବତ୍ଥ", "ଅଶ୍ବରୀ", "ଅଶ୍ୱତଥ", "ଅଶ୍ୱତଥ)", "ଅଶ୍ୱତ୍ଥ", "ଅଶ୍ଵଗନ୍ଧ)", "ଅଶ୍ଵତ୍ଥ", "ଅଷାଢୁଆ", "ଅସ୍କନ୍ଦ", "ଅସ୍କନ୍ଦମୂଳ", "ଅସ୍ବଦ", "ଆକାଶ", "ଆଖି", "ଆଖିରେ", "ଆଙ୍କୁଲ", "ଆତ", "ଆମ୍ବ", "ଇଠାଫଳ (", "ଇନ୍ଦ୍ରମାରିଷ", "ଉତୁରୁଡ଼ି", "ଉସସ୍ତ", "ଏରଣ୍ଡ)", "ଓଡ଼ିଶମାରି)", "ଓଡ଼ିଶମାରୀ", "ଓସ୍ତ", "କଇଁଞ୍ଚକାକୁଡ଼ି", "କଇଁଥ", "କଇକୋଳି", "କଇଞ୍ଚକାକୁଡ଼ି", "କଇଞ୍ଚିକାକୁଡ଼ି", "କକ (", "କଖାରୁ", "କଙ୍କଡ଼ାଶୃଙ୍ଗାର", "କଞ୍ଚନ", "କଟୁକୀ", "କଟୁକୀର", "କଣ୍ଟା,", "କଣ୍ଟାମାରିଷ", "କଣ୍ଟାର", "କଣ୍ଡ", "କତକ", "କତକମଞ୍ଜି", "କଦମ୍ବ", "କଦଳୀ", "କନିଅର", "କନ୍ଦାର", "କନ୍ଦୀ", "କପା", "କପାମଞ୍ଜିକୁ", "କବାବଚିନିକୁ", "କବାବଚିନିର", "କମଳ", "କରଞ୍ଜ", "କରଡ଼ା", "କର୍ଣ୍ଣ", "କର୍ପୂର", "କର୍ପୂରାଦି", "କର୍ପୂରାଦ୍ୟମିଦଂ", "କଲରା", "କଳଦୀ", "କଳମ୍ବ", "କଳାଜୀରା", "କଳାଜୀରାର", "କଳାତୁଳସୀ", "କଳାଦୁଦୁରା", "କଶ୍ଚି", "କାଇଁଚ", "କାଇଁଚକୁ", "କାଇଞ୍ଚ", "କାକୁଡ଼ି", "କାଗେଜିଲେମ୍ବୁ", "କାଢ଼ି", "କାଣିଲେଉଟିଆ", "କାରଣ", "କାଳଦୁଦୁରା", "କାସୁଣ୍ଡା", "କାସୁନ୍ଦି", "କାସୁନ୍ଦୀ", "କିଆ", "କିଆଗଛ", "କିନ୍ତୁ", "କୁକୁର", "କୁଡ଼ର", "କୁଡ଼େଇର", "କୁଢ଼", "କୁଢ଼)", "କୁରୁବେଲି", "କୁରୁବେଲିର", "କୁସୁମ", "କେଦାର", "କେବଳ", "କେରୁଆ", "କେରୁଆଛାଲି", "କେରୁଆଛାଲିର", "କେସନ୍ଦରା", "କୋଇଲେଖା", "କୋଇଲେଖା ।", "କୋଚିଲା", "କୋଚିଲାମଞ୍ଜି", "କୋଚିଲାମଞ୍ଜିର", "କୋଚିଳା", "କୋଚିଳାମଞ୍ଜି", "କୋରୁଆ", "କୋଳଥିଆ", "କୋଳି", "କ୍ଷୀରରେ", "ଖଇ", "ଖଇପରି", "ଖଇର", "ଖଜୁର)", "ଖଜୁରର", "ଖଡ଼ିକାସିଝୁ", "ଖଣ୍ଡିଏ", "ଖାଇବ ।", "ଖାଇଲେ", "ଗଇଶ", "ଗଙ୍ଗଶିଉଳି", "ଗଞ୍ଜାଇ", "ଗନ୍ଧ", "ଗନ୍ଧକକୁ", "ଗନ୍ଧକର", "ଗନ୍ଧଗୁହାରିଆ", "ଗନ୍ଧଣା", "ଗବ", "ଗବଗଛର", "ଗବଚେର", "ଗମ୍ଭାରି", "ଗମ୍ଭାରୀ", "ଗମ୍ଭାରୀଗଛର", "ଗରୁଡ଼", "ଗାଜର", "ଗିଲ", "ଗୁଆ", "ଗୁଜୁରାତି", "ଗୁଡ଼ିମାରି", "ଗୁଳୁଚି", "ଗେଣ୍ଡୁ", "ଗେଣ୍ଡୁଫୁଲ", "ଗୋଖରା", "ଗୋଖରାର", "ଗୋଖୁରାକଣ୍ଟା", "ଗୋଠକାକୁଡ଼ି", "ଗୋଲମରିଚ", "ଗୋଲମରିଚ)", "ଗୋଲାପ", "ଘରପୋଡ଼ିଆ", "ଘଷିଲେ", "ଘିକୁଆଁରୀ", "ଚକା", "ଚକ୍ରଦତ୍ତ)", "ଚଢ଼େଇଗୁଡ଼ି", "ଚମ୍ପା", "ଚାଉଳଧୂଆ", "ଚାଉଳଭଜା", "ଚାକୁଣ୍ଡା", "ଚିତା", "ଚିତାକୁଟି", "ଚିତାକୁଟି)", "ଚିତାପାରୁ", "ଚିନି", "ଚିନିର", "ଚିରେଇତା", "ଚିରେଇତାର", "ଚେତି", "ଚେମଣିଲଇ", "ଚେମଣିଲେଇ", "ଚେମିଣିଲଇ", "ଛଚିନା", "ଛାଲିଆ", "ଜଡ଼ା", "ଜୟନ୍ତୀ", "ଜୟପାଳ", "ଜହ୍ନି", "ଜାଇ", "ଜାଇତ୍ରୀର", "ଜାମୁ", "ଜାମୁକୋଳି", "ଜାମୁଗଛର", "ଜୀରା", "ଜୁଆଣୀ", "ଜୁଆଣୀ ।", "ଜେଉଟ", "ଟଭା", "ଟଭାଚେର (", "ଡାଲଚିନି", "ଡ଼ାଲଚିନି", "ଡାଳ", "ଡାଳ,", "ଡ଼ାଳି", "ଡାଳିମ୍ବ", "ଡ଼ିମିରି", "ଡ଼ିମ୍ବରି", "ଡ଼ିମ୍ବିରି", "ଡ଼େଙ୍ଗାଭେଜି", "ଢ଼ାମଣା", "ତାପରେ", "ତାର", "ତାଳ", "ତାଳମୂଳିକନ୍ଦା", "ତାଳିଶ", "ତାହା", "ତିନ୍ତୁଳି", "ତିହୁଡ଼ି", "ତିହୁଡ଼ି)", "ତୁତିଆ", "ତୁଳସୀ", "ତେଜ", "ତେନ୍ତୁଳି", "ତେଲ,", "ତୋଟା", "ତୋଳା", "ତୋଳା ।", "ତୋଳାକୁ", "ତ୍ରିଫଳା", "ତ୍ରିଫଳାର", "ଦକ୍ତି", "ଦନ୍ତ", "ଦନ୍ତୀ", "ଦୟଣା", "ଦହିଦହିକା", "ଦାନ୍ତ", "ଦାରୁହରିଦ୍ରା", "ଦାସକରେଣ୍ଟା", "ଦାସକେରେଣ୍ଟା", "ଦାସକେରେଷ୍ଟା", "ଦୁଦୁରା", "ଦୁଦୁରାମଞ୍ଜି", "ଦୁଧରେ", "ଦୁବ", "ଦୁରାଲାଉ", "ଦୁରାଲାଉର", "ଧରଣୀକବାଟ", "ଧଳାବଚ", "ଧାଞ୍ଜ", "ଧାତୁକି", "ଧାରଞ୍ଜ", "ଧୁତୁରା", "ଧୁତୁରା)", "ଧୂଆଁ", "ଧୂତୁରା", "ନଡ଼ିଆ", "ନଳିତା", "ନାକଚଣା", "ନାଗେଶ୍ବର", "ନାଛିକନି", "ନିଗୁଁଷି)", "ନିମ", "ନିମ୍ବ", "ନିମ୍ବଗଛ", "ନିମ୍ବଛେଲି", "ନିମ୍ବଛେଲିର", "ନିୟ", "ନିର୍", "ନିର୍ଗୁଣ୍ଡି)", "ନିଶାଦଳ", "ନେଳୀ", "ପକାଇବ ।", "ପଞ୍ଚାଙ୍ଗର", "ପଡ଼ିଥିବା", "ପଥର", "ପଥର)", "ପଦ୍ମ", "ପଦ୍ମର", "ପରାଗକୁ", "ପଲାଶ", "ପଲାସ", "ପଳାଶ", "ପସାରୁଣି", "ପସାରୁଣୀ", "ପାଉଁଶିଆ", "ପାଚିଲା", "ପାଟଳୀ", "ପାତାଳଗରୁଡ଼", "ପାନ", "ପାରିଲେ", "ପାଳଧୂଆ", "ପିଆଇବ !", "ପିଆଶାଳ", "ପିଚୁମର୍ଭ", "ପିଜୁଳି", "ପିପ୍ପଳ", "ପିପ୍ପଳୀ", "ପୁନରପି", "ପୁରୁଣି", "ପୁରୁଣି)", "ପୁରୁଣୀ", "ପୁଷ୍କର", "ପେଡ଼ିପେଡ଼ିକା", "ପେଡ଼ିପେଡ଼ିକିଆ", "ପେଣୁ)", "ପୋକଶୁଘା", "ପୋକଶୁଙ୍ଗା", "ପୋକସୁଂଘା", "ପୋକସୁଙ୍ଗା", "ପୋକସୁନ୍ଦା", "ପୋକସୁଫା", "ପୋଟଳ", "ପୋଟଳ ।", "ପୋସ୍ତକଦାନାର", "ପ୍ରତ୍ୟେକର", "ପ୍ରଭୃତି", "ପ୍ରିୟଙ୍ଗୁ", "ଫଣଫଣା", "ଫଳ", "ଫଳ,", "ଫଳର", "ଫଳରେ", "ଫିଟିକିରି", "ଫିଟିକିରିକୁ", "ବଂଶଲୋଚନା", "ବଉଳ", "ବଉଳକୋଳି", "ବଚ", "ବଜ୍ର", "ବଜ୍ରମୂଳି", "ବଜ୍ରମୂଳୀର", "ବତୁରାଇ", "ବୟସର", "ବର", "ବରକୋଳି", "ବରକୋଳିର", "ବରୁଣ", "ବସାଇ", "ବସେବତୀ", "ବାଇଗଣ", "ବାଇଗବା", "ବାଇଗବାର", "ବାଇଡ଼ଙ୍କ", "ବାଇଡ଼ଙ୍ଗ", "ବାଉଁଶ", "ବାଡ଼ିଅଁଳା", "ବାଦିଚାଙ୍ଗ", "ବାବୁଲ", "ବାଳର", "ବାଳଶିମୁଳୀକନ୍ଦା", "ବାସଙ୍", "ବାସଙ୍ଗ", "ବାସଙ୍ଗଛାଲି", "ବାସଙ୍ଗଛାଲିର", "ବାସଙ୍ଗର", "ବାହାଡ଼ା", "ବାହାଡ଼ାର", "ବିଚର", "ବିଛୁଆତି", "ବିଡ଼ଙ୍ଗ", "ବିର", "ବୁଢ଼ା", "ବୃକରି", "ବୃଦ୍ଧଦାରକ", "ବୃଦ୍ଧଦାରକର", "ବୃହତୀ)", "ବେଗୁନିଆ", "ବେଗୁନିଆ)", "ବେଗୁନିଆର", "ବେଣା", "ବେଲ", "ବେଲମୂଳର", "ଭାଗରେ", "ଭାଜି", "ଭୁଇଁଅଁଳା", "ଭୁଇଁଅଳା", "ଭୁଜ", "ଭୂଇଁଅଳା", "ଭୂଇଁକଦମ୍ବ", "ମଖମଲି)", "ମଞ୍ଚୁଆତି", "ମଞ୍ଚୁଆତି)", "ମଞ୍ଜୁଆତି", "ମଣିଲଇ", "ମତେ", "ମଧବୟସ", "ମଧ୍ୟ", "ମନଃଶିଳା", "ମନ୍ଦାର", "ମନ୍ଦି", "ମନ୍ଦିର", "ମୟୁରଚୂଳିଆ", "ମରିଚ", "ମରିଚର", "ମଲ୍ଲୀ", "ମଲ୍ଲୀଗଛର", "ମହୁ", "ମହୁର", "ମାଣସାରୁ", "ମାରୀ)", "ମାଳତୀ", "ମିଶ୍ର", "ମିଶ୍ରି", "ମୁକା (", "ମୁଚକୁନ୍ଦ", "ମୁଚୁକୁନ୍ଦ", "ମୁଣ୍ଡବାଳ", "ମୁତୁରୀ", "ମୁଥା", "ମୁଥାର", "ମୁର୍ଗା", "ମୁର୍ବା", "ମୂଳା", "ମୂଷାକାନି", "ମୋଟ", "ମୋଡ଼ମୋଡ଼ିଆ", "ଯହିଁରେ", "ଯାଠିମଧୁ", "ଯାଷ୍ଟିମଧୁ)", "ରକ୍ତଚନ୍ଦନ", "ରକ୍ତଚନ୍ଦନର", "ରଖି", "ରଖିବ ।", "ରଙ୍ଗକୋଳଥିଆ", "ରଙ୍ଗବାଣ", "ରସ (", "ରାସ୍ନା", "ରାସ୍ନାମୂଳ", "ଲଙ୍କାକାଲ", "ଲଙ୍କାଜଡ଼ା", "ଲଙ୍କାଜଡ଼ାର", "ଲବଙ୍ଗ (", "ଲବଣ", "ଲବେଙ୍କୁଡ଼ି", "ଲବେଙ୍କୁଡ଼ି)", "ଲାଗି", "ଲାଜକୁଳୀ", "ଲାଲବର୍ଣ ।", "ଲୁଣଲୁଣିକା", "ଲୁଣିଲୁଣିକା", "ଲେଉଟିଆ", "ଲେମ୍ବୁ", "ଶଙ୍ଖଜୀରକ", "ଶତ", "ଶତାବରୀ", "ଶମୀ", "ଶରପୁଖ୍ୟ", "ଶରପୁଖ୍ୟ)", "ଶରପୁଖ୍ୟା)", "ଶରପୁଙ୍ଖା", "ଶରପୁଙ୍ଖାର", "ଶରୀରଶୋଧନ", "ଶାଗ", "ଶାଳ", "ଶିତୋପଳାଦି", "ଶିମିଳି", "ଶିମୁଳି", "ଶିମୁଳିଗଛର", "ଶିମୂଳି", "ଶିମୂଳି)", "ଶିମୂଳୀ", "ଶିମ୍ବ", "ଶିରିଷ", "ଶିରୀଷ", "ଶୁଘା", "ଶୁଣୀ", "ଶୁଣ୍", "ଶୁଣ୍ଡି", "ଶୁଣ୍ଡିର", "ଶୁଷ୍ଠୀ", "ଶୁଷ୍ଠୀର", "ଶୂଳାନ୍ତକ", "ଶ୍ରୀକର୍ପୂର", "ଶ୍ୱେତପୁରୁଣୀ", "ଶ୍ଵେତକାଇଁଚ", "ଶ୍ଵେତଝୁଣା", "ଶ୍ଵେତପୁରୁଣି", "ସଜନା", "ସପୁରୀ", "ସପ୍ତପୂର୍ଣ)", "ସାହାଡ଼ା", "ସିଖୁ", "ସିଝୁ", "ସିଝୁର", "ସିତୋପଳାଦି", "ସୀତାଫଳ", "ସୁନାମୁଖୀ", "ସୁନାରି", "ସୁନାରୀ", "ସୁପୁଷ୍ପ,", "ସୁରମା", "ସୂକ୍ଷ୍ମ", "ସେବତୀ", "ସେବତୀ)", "ସେମାରାଜ", "ସୋମରାଜ", "ସୋରିଷା", "ହରିଡ଼ା", "ହରିଡ଼ା, (", "ହରିଡ଼ାର", "ହରିହରିକା", "ହଳଦିଆ,", "ହଳଦୀ", "ହଳଦୀବର", "ହସ୍ତୀଶୁଣ୍ଠି", "ହାଡ଼ଭଙ୍ଗା", "ହାଡ଼ର", "ହାତୀଦାନ୍ତକୁ", "ହିଞ୍ଜଳ", "ହେମକାକରି,", "ହେମକେଦାର", "ହେମସାଗର", "ହେମସାଗର,"];
+      var root = { key: "elements", group: -1 };
+      nodeDataArray.push(root);
+      
+      for ( var elem of elements) {
+        var childdata = { key: elem, group: -1 };
+        nodeDataArray.push(childdata);
+        linkDataArray.push({ from: root.key, to: childdata.key });
+      }
+      
+      // right treee
+      var diseases = ["ବାନ୍ତି", "ଦୂଷିତ ଘା", "ପ୍ରଦର – ଶ୍ଵେତପ୍ରଦର ଓ ରକ୍ତପ୍ରଦର", "ଝାଳ (ଘର୍ମ) - ପ୍ରତିକାର", "ପିଲାମାନେ ବିଛଣାରେ ମୁତିଲେ", "ବାଛରା ଝାଡ଼ା", "ମୃତ୍ର କୃଚ୍ଛ (ପରିସ୍ରା ବେଳେ ଯନ୍ତ୍ରଣା)", "ମୂର୍ଚ୍ଛା", "ନପୁଂସକତା ", "ଶୀଘ୍ର ପତନ ନହେବା ପାଇଁ", "ପ୍ରମେହ", "ହୃଦ୍‌ରୋଗ", "ଧବଳ କୁଷ୍ଠ", "ଜିହ୍ବାର ଜଡ଼ତା", "ସଁବାଳୁଆ କାମୁଡ଼ିଲେ", "ପଠା ଘା", "ମହୁମାଛି, ବିରୁଡ଼ି କାଟିଲେ", "କଙ୍କଡ଼ା ବିଛା ଓ ଶିଙ୍ଘମାଛ ବିଷ", "ଅନ୍ତର୍ବିଦ୍ରଧୀ (ପେଟ ଭିତର ବ୍ରଣ ବା କ୍ୟାନ୍ସର)", "ବିଛୁଆତି, ବାଇଡ଼ଙ୍କ ଲାଗି କୁଣ୍ଡାଇ ହେଲେ", "ମଳକଣ୍ଟକ", "ଜନ୍ମରୋଧ", "ସୁଖ ପ୍ରସବ", "ଚର୍ମରୋଗ (ରକ୍ତଦୋଷ ହେତୁ ସର୍ବପ୍ରକାର ଚର୍ମରୋଗ)", "ପିଲାଙ୍କର ଅଳତି ରୋଗ", "ଉପଦଂଶ (ସିଫିଲିସ୍)", "ପିଲାଙ୍କୁ ଘୁଡ଼ୁଘୁଡୁ ରୋଗ", "ଯୋନି କଣ୍ଡୁ", "ହାତ-ପାଦ ଜ୍ୱାଳା", "ସର୍ଦ୍ଦି", "ସର୍ଦ୍ଦିକାଶ ଏକାବେଳେ ହେଲେ ଓ ଛାତିରେ କଫ ହେଲେ", "ଚତୁର୍ଥକ ଜ୍ୱର", "କଫ", "ଆମରକ୍ତାତିସାର (ନାଳରକ୍ତ ଝାଡା)", "କର୍ଣ୍ଣମୂଳ ଶୋଥ", "କାନକୁଟୁରି ବା କାନରେ ପୋକ", "ଦନ୍ତରୋଗ", "ମୂତ୍ରାଘାତ ବା ମୂତ୍ରରୋଧ (ପରିସ୍ରା ବନ୍ଦ ହୋଇଗଲେ)", "ବାଲିଜନ୍ଦା ଓ ପାଣିଖିଆ", "ପିଲାଙ୍କର କଷ୍ଟରେ ଟୋପା ଟୋପା ମୂତ ହେଲେ", "ପିଲାଙ୍କର କାଶ ହେଲେ", "ଅଶ୍ରୁରୀ ଶୂଳ (ମୂତ୍ରନଳୀରେ ପଥର) - ବୃକ୍‌କଶୂଳ", "ପିଲାଙ୍କର ମୂତ ବନ୍ଦ ହେଲେ", "ଯକ୍ଷ୍ମା ରୋଗ (କ୍ଷୟ ରୋଗ)", "ବସନ୍ତ", "ଯୋନିଦାହ", "ରକ୍ତବାନ୍ତି ଓ ରକ୍ତପିତ୍ତ", "ଗର୍ଭପାତ ନ ହେବା ପାଇଁ", "ପିଲାଙ୍କୁ ପାଟି ଭିତରେ, ଜିଭରେ ଓ ଓଠରେ ଘା ହେଲେ", "ମୁଖବ୍ରଣ", "ବିଇଞ୍ଚି (ଏଜିମା)", "ତୃତୀୟକ ଜ୍ୱର", "କଟା ଘା", "ବନ୍ଧ୍ୟାର ସନ୍ତାନ ହେବାକୁ", "ଭୂତ ଉନ୍ମାଦ", "ଗଣ୍ଡମାଳା", "ମୁଣ୍ଡବ୍ୟଥା", "ପେଟବ୍ୟଥା (ଶୂଳ)", "ଅମ୍ଳରୋଗ", "ଗଳଗଣ୍ଡ", "ଗୋଦର (ଶ୍ଲୀପଦ)", "ଯୋନି ଶୂଳ", "ଲିଙ୍ଗାର୍ଶ", "ତୀକ୍ଷ୍ମଣାଗ୍ନି ( ଅସ୍ୱାଭାବିକ କ୍ଷୁଧା )", "ଅର୍ଶ", "ଅନ୍ଧାରକଣା", "ଆଖିର ଆଲୁଅ", "ପିଲାଙ୍କ କୃମି", "ବୟସ ଛଉ", "କଲେରା (ବିସୂଚିକା)", "ବାତରୋଗ ଓ ପକ୍ଷାଘାତ", "କଣନଖା ( ହାତ ବା ଗୋଡ ଆଙ୍ଗୁଠି ନଖ କୋଣ ପାଚି ଯନ୍ତ୍ରଣା ହେବା )", "ଧ୍ଵଜଭଙ୍ଗ ( ସ୍ଵାଭାବିକ ଯୌନକ୍ରିୟା ପାଇଁ ଅକ୍ଷମତା )", "ଆମବାତ ଆଣ୍ଠୁଗଣ୍ଠି ବାତ", "କନିଅର ମଞ୍ଜି ବିଷ", "ପିଲାଙ୍କର ହୁପିଙ୍ଗ୍ କଫ ବା କୁକୁର କାଶ", "ଅର୍ଶବଳି", "ଯାଦୁ", "ଭଗନ୍ଦର", "ପିଲାଙ୍କୁ ସର୍ଜିକାଶ ଥାଇ ଜ୍ଵର ହେଲେ", "ପାଳି ( ଏକାହିକ) ଜ୍ୱର", "ଜଳାତଙ୍କ", "ଶ୍ଵାସ", "ବାୟା କୁକୁର ଓ ବାୟା ବିଲୁଆ କାମୁଡ଼ିଲେ", "ବିଷାକ୍ତ ସାପ କାମୁଡ଼ିଲେ", "ମୁହଁର କଳାଦାଗ", "ଅଧକପାଳି ମୁଣ୍ଡବ୍ୟଥା", "ଅପସ୍ମାର (ମୃଗୀ) - (ମୂର୍ଚ୍ଛାରୋଗ)", "ଆଖିର ପରଳ", "ମନ୍ୟାସ୍ତମ୍ବ (ବେକ ମୋଡି ହୋଇ ରହିଯିବା ରୋଗ)", "ବାଗି (ପିଛୁଳି -ଜଙ୍ଘସନ୍ଧିରେ ଗ୍ରଛି ଫୁଲା)", "କର୍ଣ୍ଣଶୂଳ (କାନ ଟାଣିଲେ)", "ଗନେରିଆ (ଔପସର୍ଗିକ ପ୍ରମେହ)", "ଜ୍ୱରରେ ବାମ୍ଫ", "ବହୁମୂତ୍ର (ମଧୁମେହ)", "ହାଡ଼ ଭାଙ୍ଗିଲେ", "ରକା (ପବନ ଅଟକିଯିବା)-(ଆଘାତ ଜନିତ ନୁହେଁ)", "ଗ୍ରହଣୀ (ସଂଗ୍ରଣୀ)", "ମସ୍ତିଷ୍କ ଦୁର୍ବଳତା", "ମ୍ୟାଲେରିଆ ଜ୍ୱର", "ଘା ଶୁଖିବା ପାଇଁ", "ଅନିଦ୍ରା", "ମହୁରା ବିଷ (ଦାରୁମୂଷି ବିଷ)", "ମଳଦ୍ଵାର ବାହାରି ପଡ଼ିଲେ", "ଆଖିର ଫୁଲା ରୋଗ", "ଏକଶିରା ଓ କୋଷବୃଦ୍ଧି", "ପିହୁଳା", "କୋଷ୍ଠବଦ୍ଧ", "ବିସର୍ପ ମୁଖବ୍ରଣ", "ପିଲାଙ୍କର କାନକଟା ଘା ହେଲେ", "ପରିସ୍ରା ବନ୍ଦ ହେତୁ ମୂର୍ଚ୍ଛା", "ପିଲାଙ୍କର କାନ ଟାଣିଲେ", "ପିଲାଙ୍କର କାନ୍ଦୁରୀ ରୋଗ", "ସ୍ତନହରା (ଥନହରା)", "ଅନ୍ତକୋଷ", "ଅଗ୍ନି ଦଗ୍ଧ", "ପୁଷ୍ପବତୀ ହେବାକୁ", "ପିଲାଙ୍କ ପାଟିରୁ ଲାଳସ୍ରାବ ହେଲେ", "କଣ୍ଟା, କାଚ, ଲୁହାକଣ୍ଟା ଗଳିଗଲେ", "ମୁଣ୍ଡ ବୁଲାଇହେଲେ", "ପାଗଳ ରୋଗ", "ପାଣ୍ଡୁ (ଦେହର ଚର୍ମ ଅଳ୍ପ ହଳଦିଆ ମିଶ୍ରିତ ଧଳା ବା ସେଠୁଆ ଦେଖାଯାଏ) ", "ସ୍ତନ ଦୁଧ ଦୂଷିତ ହେଲେ ବିଶୁଦ୍ଧ କରିବାକୁ", "ଆଖିର ଶୁକ୍ଳଭାଗରେ ରକ୍ତବିନ୍ଦୁ ପରି ଚିହ୍ନ (ଅର୍ଜୁନ ରୋଗ)", "ଆଖିରୁ ପାଣି ବୋହିବା, କୁହୁଡ଼ିଆ ଦେଖାଯିବା", "ପେଟଫମ୍ପା", "ମୁଣ୍ଡର ଉକୁଣୀ", "ଋତୁକାଳରେ ଅଧୁକ ରକ୍ତସ୍ରାବ", "ମୁଣ୍ଡର ଉପି ବା ରୁପି", "ଆବୁ", "କାଛୁ କୁଣ୍ଡିଆ", "ଶୋଥ", "ଦୁଦୁରା ବିଷ", "ନିଦ ନ ହେବାକୁ", "ଶଙ୍ଖୁଆ ବିଷ", "ସ୍ତନରେ ଦୁଧ ହେବାକୁ", "ସ୍ଵପ୍ନଦୋଷ", "ଋତୁଶୂଳ ବା ବାଧକ", "ଅଶୁଦ୍ଧ ପାରା ଖାଇବାର କ୍ଷତିକାରକ ପ୍ରଭାବ", "ପିଲାଙ୍କର କୋଷ୍ଠବଦ୍ଧ ହେଲେ", "ନାଭି ଫୁଲିଲେ", "ବାୟା ହୋଇ ନଥୁବା କୁକୁର କାମୁଡ଼ିଲେ", "ଅଫିମ ବିଷ", "ଅଜୀର୍ଣ୍ଣ", "ଚନ୍ଦାମୁଣ୍ଡରେ ବାଳ ଉଠିବାକୁ", "ପୁରାତନ ଜ୍ଵର", "ଅତିସାର (ଅଜୀର୍ଣ ଝାଡ଼ା)", "ପବକାଣ୍ଡ (ବେଢ଼ାଆଙ୍ଗୁଳି)", "ଆଖି ରକ୍ତବର୍ଣ୍ଣ ଦିଶିଲେ", "ବାତପୈତ୍ତିକ ଜ୍ୱର", "ନିର୍ଲୋମକରଣ", "ରକ୍ତାତିସାର (ରକ୍ତଝାଡା)", "ଲିଙ୍ଗରୁ ରକ୍ତ ସ୍ରାବ", "ଅଗିଆବାତ (ଦେହ କୁଣ୍ଡାଇ ହୋଇ ଚକାଚକା ହୋଇ ଫଳିଯିବା)", "ଯକୃତ (ଲିଭର) ଠିକ୍ ଭାବରେ କାମ ନ କରିବା", "ଗୃଧ୍ରସି (ପିଚା ଠାରୁ ପାଦ ପର୍ଯ୍ୟନ୍ତ ସ୍ନାୟୁରେ ଯନ୍ତ୍ରଣା)", "ଅଫିମ ଖାଇବା ଅଭ୍ୟାସ ଛାଡ଼ିବା ପାଇଁ", "ଆପେଣ୍ଡିସାଇଟିସ୍ (ଅନ୍ତଗୃଚ୍ଛ ପ୍ରଦାହ), ବାତଗୁଚ୍ଛ", "ଦାନ୍ତର ପାଇରିଆ", "ଗୁଳ୍ମ", "ଆଖିରେ ମୋତିଆବିନ୍ଦୁ", "ଜଳୋଦର ଓ ଉଦର ରୋଗ", "ସାପ ଗରଳ ଖାଇ ବିଷ ବିକାର ହେଲେ", "ପିଲାଙ୍କର କାନରେ ପୂଯ ହେଲେ", "ଦାନ୍ତ ଟାଣହେବାକୁ", "ଅଳ୍ପାର୍ତବ ( ରଡ଼କାଳରେ ଅଳ୍ପ ଋତୁସ୍ରାବ), କଷ୍ଟାର୍ତବ", "ସୂତିକା ସନ୍ନିପାତ ରୋଗୀ ମରିଯାଉଥିଲେ", "ପ୍ରସବ ପରେ ଫୁଲ ପଡ଼ିବାକୁ", "ମୂଷା, ଚୁଚୁନ୍ଦ୍ରା କାମୁଡ଼ିଲେ", "ପ୍ଳୀହା ବଢ଼ିଯିବା ରୋଗ", "ଅଣ୍ଟାଧରା", "ମୋଟା ହୋଇଯିବା ରୋଗ (ମେଦ ରୋଗ ବା ସ୍ଥୌଲ୍ୟ ରୋଗ)", "ବ୍ୟାଧିହରଣ", "ସ୍ତନରକ୍ଷା", "ରକ୍ତଚାପ (ଉଚ୍ଚ)", "ଋତୁରୋଧ, ଅସମ୍ୟକ୍ ଋତୁ", "ନାଳୀ ଘା (ଶୀରା ବା ଅସ୍ଥି ମଧ୍ୟରେ ଥିବା ସଂକୀର୍ଣ ମାର୍ଗରେ ହୋଇଥିବା କ୍ଷତ)", "ବାତଶ୍ଳେଷ୍ମା ଜ୍ୱର", "ସନ୍ନିପାତ ଜ୍ୱର", "ସ୍ବରଭଙ୍ଗ", "ଗଳା କ୍ୟାନସର୍", "ସର୍ବଜ୍ୱର ହର", "ସ୍ତ୍ରୀ ରୋଗ (ଯାବତୀୟ ସ୍ତ୍ରୀ ରୋଗ)", "ରକ୍ତମୂତ୍ର", "ପରିସ୍ରା ବେଶି ହେଲେ", "ପିଲାଙ୍କ ନାଳ ଝାଡ଼ା ଓ ନାଳରକ୍ତ ଝାଡ଼ା", "ପାଚିଲା ବ୍ରଣ ଫଟାଇବାକୁ", "ଅଗ୍ନିମାନ୍ଦ୍ୟ (ପରିପାକ ଶକ୍ତିର ହ୍ରାସ)", "ପିତ୍ତଶ୍ଳେଷା ଜ୍ୱର", "ନାକ ଭିତରେ ପିନସ୍ ଘା", "ପିଲା ଦୁଧ ଛାଡ଼ିବାକୁ", "ପ୍ରସବ ବା ଗର୍ଭପାତ ପରେ ବେଶି ରକ୍ତସ୍ରାବ ହେଉଥିଲେ", "ହରିତାଳ ବିଷ", "ଅଙ୍କୁଶ କୃମି", "ମୃତବତ୍ସା ((ଯେଉଁ ମା'ର ପିଲା ପେଟରୁ ମରିକରି ଜନ୍ମହେଲେ କିମ୍ବା ଜନ୍ମର ୨ ବର୍ଷ ଭିତରେ ମରିଯାଉଥିଲେ )", "ଜ୍ୱରରେ ରୋଗୀର ପଥ୍ୟ", "ହରପିସ୍ (ମାଙ୍କଡ଼ସା ମୂତିବା ରୋଗ)", "କାଶ", "ନାକର ସମସ୍ତ ରୋଗ", "ଦାନ୍ତ ହଲିଲେ", "(ପୂତିକର୍ଣ୍ଣ) କାନରୁ ପୂଯ ବାହାରିବା", "କଣ୍ଠସ୍ୱର", "ବଧୀରତା", "ଭାଲିଆ ଧୂଆଁ ବାଜି କିମ୍ବା ତାର ରସ ଲାଗି ଦେହରେ ଫୁଲା ଓ ବ୍ରଣ ହେଲେ", "ମକଚି ହୋଇ ଜଖମ ହେଲେ", "ପେଟରୁ ମଲା ପିଲା ବାହାରିବାକୁ", "ପ୍ରବଳ ଜ୍ୱର", "ସର୍ବ ଜ୍ଵରହର", "ପିଲାଙ୍କୁ କେବଳ ଜ୍ଵର ହେଲେ", "ପିଲାଙ୍କର ସର୍ଦ୍ଦି", "ଘଣ୍ଟିକା (ଉପଜିହ୍ନା ରୋଗ)", "ଜିହ୍ୱାରୋଗ", "ଭାଲିଆ ବିଷ", "ପ୍ରସବ ପରେ ସୂତିକା ରୋଗ ନହେବା ପାଇଁ ସୂତିକା ଦଶମୂଳ କ୍ରାଥ", "ଅକାରଣରେ ଦାନ୍ତରୁ ରକ୍ତ ବାହାରିଲେ", "ଗୋଡ଼ ଫଟା", "ସୂତିକା", "ପିଲାଙ୍କ ଶ୍ବାସ", "ଗାଲୁଆ", "ମୁଣ୍ଡରୁ ବାଳ ଉପୁଡ଼ିଲେ", "ପିଲାଙ୍କ ମୁଣ୍ଡରେ ଘା ବା ବଡ଼ା ହେଲେ", "କୃଷ୍ଣବର୍ଷ ଦମ୍ପତିର ଗୌରବର୍ଣ ସନ୍ତାନ ହେବାକୁ", "କଫ ଜ୍ୱର", "ଅମ୍ଳପିତ୍ତ ( ଅଧୁକ ପାଚନ ରସ ଓ ପିତ୍ତ ନିଃସରଣ )", "କୃଷ୍ଣ ରୋଗ", "ପଦ୍ମକଣ୍ଟା (ଶରୀର ଉପରେ ବା ଭିତରେ ଭାତୁଡ଼ି ପରି ଆବୁ)", "ପିତ୍ତଜ୍ୱର", "ପିଲାଙ୍କର ଜାକୃସି ରୋଗ (ଗୁଦବ୍ରଣ)", "କୋଚିଲା ବିଷ", "କଣ୍ଡୁ (ବଡ଼ବଡ଼ ଘିମିରି ହେଇ କୁଣ୍ଡାଇ  ହେବା)", "ଜ୍ୱରରେ ଧୂପ", "ସହବାସ ଓ ଗର୍ଭାବସ୍ଥା", "ଜ୍ଵର - (ବିଭିନ୍ନ ପ୍ରକାର)", "ଗଳାକ୍ଷତ", "ପିଲାଙ୍କ ପେଟ କାମୁଡ଼ିଲେ", "ବାତଜ୍ଵର (ବାତଜନତି ଜ୍ୱର) (ଶରୀରସ୍ଥ ‘ବାୟୁ” ବା “ବାତ’ର ଅସୁନ୍ତଳତା ଯୋଗୁ ଜ୍ବର)", "କାମଳ", "ଦ୍ୱାହିକ ଜ୍ୱର", "ଚର୍ମ ଉକୁଣୀ", "ପିଲାଙ୍କ ଦେହ ମୋଡ଼ି ହେଲେ", "ନାକରୁ ରକ୍ତ ପଡ଼ିଲେ", "ପିତ୍ତ ପଥୁରି (ପିତ୍ତକୋଷଶିଳା)", "ମିଳିମିଳା", "ନାକର ହାଡ଼ରେ ବ୍ରଣ ହେଲେ", "ପ୍ଲୁରିସି", "ଘା ରେ ପୋକ ପଡ଼ିଲେ", "ମୁଣ୍ଡର ବାଳ ବଢ଼ିବାକୁ", "ଆମାତିସାର (ନାଳ ଝାଡ଼ା)", "ନଖ ମରିଯାଉଥିଲେ", "ଗର୍ଭଣୀର ସ୍ତନରେ କଣ୍ଡୁ ହେଲେ", "ଅତି ପ୍ରସବ ହେତୁ ପେଟ ବଢ଼ିଲେ", "ସହବାସ ପରେ କେତେକ ଉପାଦେୟ ସାଧାରଣ ନିୟମ", "ଆନ୍ତ୍ରିକ ଜ୍ଵର", "ଚକ୍ଷୁରୋଗ", "କାଖଗୁଲି", "ବ୍ରଣ", "ହିକ୍କା", "ପିଲାଙ୍କ ରୋହିଣୀ, ଘଣ୍ଟିକା, ଗଳକ୍ଷତ"];
+      var root = { key: "diseases", group: -2 };
+      nodeDataArray.push(root);
+      
+      for ( var dis of diseases) {
+        var childdata = { key: dis, group: -2 };
+        nodeDataArray.push(childdata);
+        linkDataArray.push({ from: root.key, to: childdata.key });
+      }
+      //</AddSwarup>
+
+      myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+    }
+
+    // help create a random tree structure
+    function makeTree(level, count, max, nodeDataArray, linkDataArray, parentdata, groupkey, rootkey) {
+      var numchildren = Math.floor(Math.random() * 10);
+      for (var i = 0; i < numchildren; i++) {
+        if (count >= max) return count;
+        count++;
+        var childdata = { key: rootkey + count, group: groupkey };
+        nodeDataArray.push(childdata);
+        linkDataArray.push({ from: parentdata.key, to: childdata.key });
+        if (level > 0 && Math.random() > 0.5) {
+          count = makeTree(level - 1, count, max, nodeDataArray, linkDataArray, childdata, groupkey, rootkey);
+        }
+      }
+      return count;
+    }
+    window.addEventListener('DOMContentLoaded', init);
+
+
+    function updateNodeWidths(group, width) {
+      if (isNaN(width)) {
+        group.memberParts.each(n => {
+          if (n instanceof go.Node) n.width = NaN;  // back to natural width
+        });
+      } else {
+        var minx = Infinity;  // figure out minimum group width
+        group.memberParts.each(n => {
+          if (n instanceof go.Node) {
+            minx = Math.min(minx, n.actualBounds.x);
+          }
+        });
+        if (minx === Infinity) return;
+        var right = minx + width;
+        group.memberParts.each(n => {
+          if (n instanceof go.Node) n.width = Math.max(0, right - n.actualBounds.x);
+        });
+      }
+    }
+
+    // this function is only needed when changing the value of ROUTINGSTYLE dynamically
+    function changeStyle() {
+      // find user-chosen style name
+      var stylename = "ToGroup";
+      var radio = document.getElementsByName("MyRoutingStyle");
+      for (var i = 0; i < radio.length; i++) {
+        if (radio[i].checked) {
+          stylename = radio[i].value; break;
+        }
+      }
+      if (stylename !== ROUTINGSTYLE) {
+        myDiagram.commit(diag => {
+          ROUTINGSTYLE = stylename;
+          diag.findTopLevelGroups().each(g => updateNodeWidths(g, NaN));
+          diag.layoutDiagram(true);  // force layouts to happen again
+          diag.links.each(l => l.invalidateRoute());
+        });
+      }
+    }
+  </script>
+
+<div id="sample">
+  <h1>Mapping of Plant Elements to Disease in Laxman Mishra's book</h1>
+  <div id="myDiagramDiv" style="background-color: white; border: solid 1px black; width: 100%; height: 550px">
+  
+  <!-- <CommentSwarup -->
+  <!-- <p>The model data, automatically updated after each change or undo or redo:</p>
+  <textarea id="mySavedModel" style="width:100%;height:300px"></textarea> -->
+  <!-- </CommentSwarup -->
+</div>
+    </div>
+    <!-- * * * * * * * * * * * * * -->
+    <!--  End of GoJS sample code  -->
+  </div>
+</body>
+<!--  This script is part of the gojs.net website, and is not needed to run the sample -->
+<!-- <script src="../assets/js/goSamples.js"></script> -->
+</html>
