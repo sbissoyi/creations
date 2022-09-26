@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Electronic Taxonomy of Plants</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="css/mdb.min.css" />
+  <!-- PRISM -->
+  <!-- <link rel="stylesheet" href="dev/css/new-prism.css" /> -->
+  <!-- Custom styles -->
+  <style>
+    .page-intro {
+      background-color: white;
+      width: 100vw;
+      min-height: 100vh;
+    }
+
+    img {
+      max-width: 80%;
+    }
+
+    .mdb-page-content {
+      padding-left: 240px;
+      transition: padding 0.3s linear;
+    }
+
+    #toggler {
+      display: none;
+    }
+
+    @media (max-width: 660px) {
+      .mdb-page-content {
+        padding-left: 0px;
+      }
+
+      #toggler {
+        display: unset;
+      }
+
+      .mask img {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="full-screen-example" class="sidenav bg-light" data-color="dark" data-mode="side" data-hidden="false"
+    data-scroll-container="#scrollContainer">
+    <div class="mt-4">
+      <div id="header-content" class="pl-3">
+        <!-- <i class="fa-solid fa-tree fa-10x"></i> -->
+        <!-- <img src="https://mdbootstrap.com/img/Photos/Avatars/img%20(23).jpg" alt="avatar"
+          class="rounded-circle img-fluid mb-3" style="max-width: 50px;" /> -->
+
+        <h4>
+          <span style="white-space: wrap;">Electronic Taxonomy of Plants</span>
+        </h4>
+        <!-- <p>swarupananda@gmail.com</p> -->
+      </div>
+      <hr class="mb-0" />
+    </div>
+    <div id="scrollContainer">
+      <ul class="sidenav-menu">
+        <li class="sidenav-item">
+          <a class="sidenav-link" href="/"> <i class="fas fa-tree pr-3"></i>Flowering</a>
+          <ul class="sidenav-collapse">
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group1', 'Flowering : Group 1');">Group 1</a>
+            </li>
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group2', 'Flowering : Group 2');">Group 2</a>
+            </li>
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group3', 'Flowering : Group 3');">Group 3</a>
+            </li>
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group4', 'Flowering : Group 4');">Group 4</a>
+            </li>
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group5', 'Flowering : Group 5');">Group 5</a>
+            </li>
+          </ul>
+        </li>
+        
+        <li class="sidenav-item">
+          <a class="sidenav-link"> <i class="fas fa-tree pr-3"></i>Non-Flowering</a>
+          <ul class="sidenav-collapse">
+            <li class="sidenav-item">
+              <a class="sidenav-link" href="javascript:loadModel('group6', 'Non-Flowering : Group 1');">Group 1</a>
+            </li>
+          </ul>
+        </li>
+        <hr class="m-0" />
+        <li class="sidenav-item">
+          <a class="sidenav-link"> <i class="fas fa-info pr-3"></i>About</a>
+          <ul class="sidenav-collapse">
+            <li class="sidenav-item">
+              <p class="text-muted small"><b>Conceptualization:</b><br>Dr. A. K. Biswal<br><i>Former Professor</i><br>Dept. of Botany<br>Maharaja Sriram Chandra Bhanja Deo University</p>
+              <p class="text-muted small"><b>Developed by:</b><br>Dr. Swarupananda Bissoyi<br><i>Asst. Professor</i><br>Dept. of Computer Application<br>Maharaja Sriram Chandra Bhanja Deo University</p>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <hr class="m-0" />
+      <!-- <p class="text-center">https://sbissoyi.github.io</p> -->
+    </div>
+    <!-- <div class="text-center" style="height: 100px;">
+      <hr class="mb-4 mt-0" />
+      <p>https://sbissoyi.github.io</p>
+    </div> -->
+  </div>
+
+
+
+  <!-- PRISM -->
+  <!-- <script type="text/javascript" src="dev/js/new-prism.js"></script> -->
+  <!-- MDB SNIPPET -->
+  <!-- <script type="text/javascript" src="dev/js/dist/mdbsnippet.min.js"></script> -->
+  <!-- MDB -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+
+  <!-- Custom scripts -->
+  <script type="text/javascript">
+    const sidenav = document.getElementById('full-screen-example');
+    const instance = mdb.Sidenav.getInstance(sidenav);
+
+    let innerWidth = null;
+
+    const setMode = (e) => {
+      // Check necessary for Android devices
+      if (window.innerWidth === innerWidth) {
+        return;
+      }
+
+      innerWidth = window.innerWidth;
+
+      if (window.innerWidth < 660) {
+        instance.changeMode('over');
+        instance.hide();
+      } else {
+        instance.changeMode('side');
+        instance.show();
+      }
+    };
+
+    setMode();
+
+    // Event listeners
+
+    window.addEventListener('resize', setMode);
+
+
+  </script>
+  <script src="js/go.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,500' rel='stylesheet' type='text/css'>
+  <script id="code">
+
+    async function loadJSON() {
+      const response = await fetch("taxa.json");
+      json = await response.json();
+      //console.log(json["group1"]);
+    }
+
+    loadJSON();
+
+    function init() {
+      var $ = go.GraphObject.make;  // for conciseness in defining templates
+      myDiagram = $(go.Diagram, "myDiagramDiv",  // must name or refer to the DIV HTML element
+        {
+          initialContentAlignment: go.Spot.Left,
+          allowSelect: false,  // the user cannot select any part
+          // create a TreeLayout for the decision tree
+          layout: $(go.TreeLayout)
+        });
+      // custom behavior for expanding/collapsing half of the subtree from a node
+      function buttonExpandCollapse(e, port) {
+        var node = port.part;
+        node.diagram.startTransaction("expand/collapse");
+        var portid = port.portId;
+        node.findLinksOutOf(portid).each(function (l) {
+          if (l.visible) {
+            // collapse whole subtree recursively
+            collapseTree(node, portid);
+          } else {
+            // only expands immediate children and their links
+            l.visible = true;
+            var n = l.getOtherNode(node);
+            if (n !== null) {
+              n.location = node.getDocumentPoint(go.Spot.TopRight);
+              n.visible = true;
+            }
+          }
+        });
+        myDiagram.toolManager.hideToolTip();
+        node.diagram.commitTransaction("expand/collapse");
+      }
+      // recursive function for collapsing complete subtree
+      function collapseTree(node, portid) {
+        node.findLinksOutOf(portid).each(function (l) {
+          l.visible = false;
+          var n = l.getOtherNode(node);
+          if (n !== null) {
+            n.visible = false;
+            collapseTree(n, null);  // null means all links, not just for a particular portId
+          }
+        });
+      }
+      // get the text for the tooltip from the data on the object being hovered over
+      function tooltipTextConverter(data) {
+        var str = "";
+        var e = myDiagram.lastInput;
+        var currobj = e.targetObject;
+        if (currobj !== null && (currobj.name === "ButtonA" ||
+          (currobj.panel !== null && currobj.panel.name === "ButtonA"))) {
+          str = data.aToolTip;
+        } else {
+          str = data.bToolTip;
+        }
+        return str;
+      }
+      // define tooltips for buttons
+      var tooltipTemplate =
+        $("ToolTip",
+          { "Border.fill": "whitesmoke", "Border.stroke": "lightgray" },
+          $(go.TextBlock,
+            {
+              font: "13pt sans-serif",
+              wrap: go.TextBlock.WrapFit,
+              desiredSize: new go.Size(200, NaN),
+              alignment: go.Spot.Center,
+              margin: 6
+            },
+            new go.Binding("text", "", tooltipTextConverter))
+        );
+      // define the Node template for non-leaf nodes
+      myDiagram.nodeTemplateMap.add("decision",
+        $(go.Node, "Auto",
+          new go.Binding("text", "key"),
+          // define the node's outer shape, which will surround the Horizontal Panel
+          $(go.Shape, "Rectangle",
+            { fill: "whitesmoke", stroke: "lightgray" }),
+          // define a horizontal Panel to place the node's text alongside the buttons
+          $(go.Panel, "Horizontal",
+            $(go.TextBlock,
+              { font: "20px Roboto, sans-serif", margin: 5 },
+              new go.Binding("text", "key")),
+            // define a vertical panel to place the node's two buttons one above the other
+            $(go.Panel, "Vertical",
+              { defaultStretch: go.GraphObject.Fill, margin: 3 },
+              $("Button",  // button A
+                {
+                  name: "ButtonA",
+                  click: buttonExpandCollapse,
+                  toolTip: tooltipTemplate
+                },
+                new go.Binding("portId", "a"),
+                $(go.TextBlock,
+                  {
+                    font: '13px Roboto, sans-serif',
+                    wrap: go.TextBlock.WrapFit,
+                    desiredSize: new go.Size(200, NaN),
+                    margin: 5,
+                  },
+                  new go.Binding("text", "aText"))
+              ),  // end button A
+              $("Button",  // button B
+                {
+                  name: "ButtonB",
+                  click: buttonExpandCollapse,
+                  toolTip: tooltipTemplate
+                },
+                new go.Binding("portId", "b"),
+                $(go.TextBlock,
+                  {
+                    font: '13px Roboto, sans-serif',
+                    wrap: go.TextBlock.WrapFit,
+                    desiredSize: new go.Size(200, NaN),
+                    margin: 5,
+                  },
+                  new go.Binding("text", "bText"))
+              )  // end button B
+            )  // end Vertical Panel
+          )  // end Horizontal Panel
+        ));  // end Node and call to add
+      // define the Node template for leaf nodes
+      myDiagram.nodeTemplateMap.add("leaf",
+        $(go.Node, "Auto",
+          new go.Binding("text", "key"),
+          $(go.Shape, "Rectangle",
+            { fill: "whitesmoke", stroke: "lightgray" }),
+          $(go.TextBlock,
+            {
+              font: '20px Roboto, sans-serif',
+              wrap: go.TextBlock.WrapFit, desiredSize: new go.Size(200, NaN), margin: 5
+            },
+            new go.Binding("text", "text"))
+        ));
+      // define the only Link template
+      myDiagram.linkTemplate =
+        $(go.Link, go.Link.Orthogonal,  // the whole link panel
+          { fromPortId: "" },
+          new go.Binding("fromPortId", "fromport"),
+          $(go.Shape,  // the link shape
+            { stroke: "lightblue", strokeWidth: 2 })
+        );
+      // create the model for the decision tree
+      model =
+        $(go.GraphLinksModel,
+          { linkFromPortIdProperty: "fromport" });
+
+      //myDiagram.model = model;
+      
+    }
+
+    function makeNodes() {
+      var nodeDataArray = json[currentGroup];
+      // Provide the same choice information for all of the nodes on each level.
+      // The level is implicit in the number of characters in the Key, except for the root node.
+      // In a different application, there might be different choices for each node, so the initialization would be above, where the Info's are created.
+      // But for this application, it makes sense to share the initialization code based on tree level.
+      for (var i = 0; i < nodeDataArray.length; i++) {
+        var d = nodeDataArray[i];
+        if (d.isFinal == false) {
+          d.category = "decision";
+          d.a = "x";
+          d.b = "y";
+        }
+        else
+          d.category = "leaf";
+      }
+      model.nodeDataArray = nodeDataArray;
+    }
+    // The key strings implicitly hold the relationship information, based on their spellings.
+    // Other than the root node ("1"), each node's key string minus its last letter is the
+    // key to the "parent" node.
+    function makeLinks() {
+      var linkDataArray = [];
+      var nda = model.nodeDataArray;
+      for (var i = 0; i < nda.length; i++) {
+        if (nda[i].isFinal == false) {
+          var start = nda[i].key;
+
+          var xEnd = nda[i].x;
+          var yEnd = nda[i].y;
+
+          //console.log(start + "--x--" + xEnd) ;
+          var objX = { from: start, fromport: 'x', to: xEnd };
+          linkDataArray.push(objX);
+          //console.log(start + "--y--" + yEnd) ;
+          var objY = { from: start, fromport: 'y', to: yEnd };
+          linkDataArray.push(objY);
+        }
+      }
+      model.linkDataArray = linkDataArray;
+    }
+
+    function loadModel(groupNo, title) {
+      var titleTag = document.getElementById("myTitle") ;
+      titleTag.innerHTML = title ;
+      currentGroup = groupNo ;
+      // set up the model with the node and link data
+      makeNodes();
+      makeLinks();
+      myDiagram.model = model;
+      // make all but the start node invisible
+      myDiagram.nodes.each(function (n) {
+        if (n.text !== "1") n.visible = false;
+      });
+      myDiagram.links.each(function (l) {
+        l.visible = false;
+      });
+
+    }
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+  
+  <div class="mdb-page-content text-center page-intro bg-light">
+    
+
+    <div id="myDiagramDiv"  style="background-color: white; border: solid 1px rgba(0, 0, 0, .25); width: 100%; height: 600px">
+    </div>
+    <h3 id="myTitle" class="text-center"></h3>
+    <button id="toggler"class="btn btn-dark mt-5"data-toggle="sidenav"data-target="#full-screen-example">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+  </div>
+  </div>
+  <!-- <footer class="bg-light text-center text-lg-start">
+  <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+    © 2020 Copyright:
+    <a class="text-dark" href="https://mdbootstrap.com/">MDBootstrap.com</a>
+  </div>
+</footer> -->
+</body>
+
+</html>

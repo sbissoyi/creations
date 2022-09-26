@@ -1,0 +1,2006 @@
+{
+	"group1" :
+		[
+        { "key":"1", 
+          "aText": "Stamens indefinite",
+          "bText": "stamens definite",
+          "x": "2", 
+          "y": "24", "isFinal": false },
+
+        { "key":"2",
+          "aText":"Plants aquatic. Leaves peltate. Thalamus spongy", 
+          "bText":"Plants terrestrial. Leaves and thalamus not as above",
+          "x":"2xf",
+          "y":"3", "isFinal": false },
+           
+        { "key":"2xf","text":"Nelumbonaceae",
+          "isFinal": true},
+
+        { "key":"3",
+          "aText":"Ovary apocarpus.",
+          "bText":"Ovary syncarpous",
+          "x":"4",
+          "y":"6","isFinal": false },
+
+        { "key":"4",
+          "aText":"Calyx accrescent, acidic. Perianth bi-seriate.",
+          "bText":"Calyx not as above. Perianth 3 to many-seriate",
+          "x":"4xf",
+          "y":"5","isFinal": false},
+
+        { "key":"4xf","text":"Dilleniaceae",
+          "isFinal": true},
+
+        { "key":"5",
+          "aText":"Fls. fragrant, bright yellow. Anthers introrse.Receptacle elongate, columnar.",
+          "bText":"Fls. not as above. Anthers extrose. Receptacle short, sub-globose.",
+          "x":"5xf",
+          "y":"5yf","isFinal": false},
+
+        { "key":"5xf","text":"Magnoliaceae",
+          "isFinal": true},
+
+        { "key":"5yf","text":"Annonaceae",
+          "isFinal": true},
+
+        { "key":"6",
+          "aText":"Staminal-tube present",
+          "bText":"staminal-tube absent",
+          "x":"7",
+          "y":"10","isFinal": false},
+
+        { "key":"7",
+          "aText":"Style passes through the staminal tube.",
+          "bText":"Style free from the staminal tube",
+          "x":"7xf",
+          "y":"8", "isFinal": false},
+
+        { "key":"7xf","text":"Malvaceae",
+          "isFinal": true},
+
+        { "key":"8",
+          "aText":"Fls, zygomorphic with largest petal crestate",
+          "bText":"Fls. act inomorphiec. Petal not crestate.",
+          "x":"8xf",
+          "y":"9","isFinal": false},
+
+        { "key":"8xf","text":"Polygalaceae",
+          "isFinal": true},
+
+        { "key":"9",
+          "aText":"Leaves digitately compound. Epicalyx present.",
+          "bText":"Leaves simple (except Sterculia). Epicalyx absent",
+          "x":"9xf",
+          "y":"9yf","isFinal": false},
+
+        { "key":"9xf","text":"Boebacacene",
+          "isFinal": true},
+
+        { "key":"9yf","text":"Sterculiaceae",
+          "isFinal": true},
+
+        { "key":"10",
+          "aText":"Fls. in globose head. Fruits pod or lomentum.",
+          "bText":"Fls. not in globose head. Fruits otherwise.",
+          "x":"10xf",
+          "y":"11","isFinal": false},
+
+        { "key":"10xf","text":"Mimosaceae",
+          "isFinal": true},
+
+        { "key":"11",
+          "aText":"Plants armed(except Crateva)",
+          "bText":"Plants unarmed",
+          "x":"12",
+          "y":"14","isFinal": false },
+
+        { "key":"12",
+          "aText":"Leaves pinnatifid. Fls. bright yellow. Frts. prickly.",
+          "bText":"Leaves not incised.Fls. otherwise. Frts.not prickly",
+          "x":"12xf",
+          "y":"13","isFinal": false},
+
+        { "key":"12xf","text":"Papaveraceae",
+          "isFinal": true},
+
+        { "key":"13",
+          "aText":"Leaves compound with pellucid glands beneath",
+          "bText":"Leaves simple without glands beneath",
+          "x":"13xf",
+          "y":"13yf","isFinal": false},
+
+        { "key":"13xf","text":"Rutaceae",
+          "isFinal": true},
+
+        { "key":"13yf","text":"Capparaceae",
+          "isFinal": true},
+
+        { "key":"14",
+          "aText":"Plants herbaceous",
+          "bText":"Plants shrubby or trees",
+          "x":"15",
+          "y":"16","isFinal": false},
+
+        { "key":"15",
+          "aText":"Plants succulent. Fruits smooth.",
+          "bText":"Plants not fleshy. Fruits echinate (except Chorchorus)",
+          "x":"15xf",
+          "y":"15yf","isFinal": false},
+
+        { "key":"15xf","text":"Portulacaceae",
+          "isFinal": true},
+
+        { "key":"15yf","text":"Tiliaceae",
+          "isFinal": true},
+
+        { "key":"16",
+          "aText":"Leaves palmately veined. Placentation parietal.",
+          "bText":"Leaves pinnately veined(except Grevia). Placentation axile",
+          "x":"17",
+          "y":"18","isFinal": false},
+
+        { "key":"17",
+          "aText":"Leaves palmately lobed. Fls. bright yellow. Capsules 3-5 valved, smooth: seeds cottony.",
+          "bText":"Leaves not lobed. Fls. pinkish. Capeules 2-valved, echinate: seeds not cottony.",
+          "x":"17xf",
+          "y":"17yf","isFinal": false},
+
+        { "key":"17xf","text":"Cochlospermacene",
+          "isFinal": true},
+
+        { "key":"17yf","text":"Bixaceae",
+          "isFinal": true},
+
+        { "key":"18",
+          "aText":"Wood resinous. Fruits samana",
+          "bText":"Wood without resin. Fruits otherwise.",
+          "x":"18xf",
+          "y":"19","isFinal": false},
+
+        { "key":"18xf","text":"Dipterocarpaceae",
+          "isFinal": true},
+
+        { "key":"19",
+          "aText":"Staminodes present",
+          "bText":"Staminodes absent (except Brownlowia)",
+          "x":"19xf",
+          "y":"20","isFinal": false},
+
+        { "key":"19xf","text":"Sterculiaceae",
+          "isFinal": true},
+
+        { "key":"20",
+          "aText":"Leaves entire.",
+          "bText":"Leaves serrate.",
+          "x":"21",
+          "y":"23","isFinal": false},
+
+        { "key":"21",
+          "aText":"Leaves silvery beneath. Stanena in bundles.Staminodes present.",
+          "bText":"Leaves not an above. Stanens free. Staminodes absent.",
+          "x":"21xf",
+          "y":"22","isFinal": false},
+
+        { "key":"21xf","text":"Tiliaceae",
+          "isFinal": true},
+
+        { "key":"22",
+          "aText":"Fls. white. Calyx caducous. Fruitt's baccate.",
+          "bText":"Fls. purple or cream. coloured. Calyx persistent. Fruitt's Capsule.",
+          "x":"22xf",
+          "y":"22yf","isFinal": false},
+
+        { "key":"22xf","text":"Clusiaceae",
+          "isFinal": true},
+
+        { "key":"22yf","text":"Lythraceae",
+          "isFinal": true},
+
+        { "key":"23",
+          "aText":"Inf. cymose. Stigns lobed",
+          "bText":"Inf. racemose. Stigma entire",
+          "x":"23xf",
+          "y":"23yf","isFinal": false},
+
+        { "key":"23xf","text":"Tiliaceae",
+          "isFinal": true},
+
+        { "key":"23yf","text":"Ochnaceae",
+          "isFinal": true},
+
+        { "key":"24",
+          "aText":"Corolla papilionaceous.",
+          "bText":"Corolla not as above.",
+          "x":"24xf",
+          "y":"25", "isFinal": false},
+
+        { "key":"24xf","text":"Fabaceae",
+          "isFinal": true},
+
+        { "key":"25",
+          "aText":"Plants tendril bearing.",
+          "bText":"Plante not tendril beacing (excepe Hugonia).",
+          "x":"26",
+          "y":"29","isFinal": false},
+
+        { "key":"26",
+          "aText":"Stamens 10, often reduced to staminode. Pods elongate,flat.",
+          "bText":"Stamens less than 10. Fruits not as above.",
+          "x":"27",
+          "y":"28","isFinal": false},
+
+        { "key":"27",
+          "aText":"Leaves apically not ched. Calyx-tubes spathaceous.Petals clawed.",
+          "bText":"Leaves not as above. Calyx-tubes campanulate. Petals not clawed",
+          "x":"27xf",
+          "y":"27yf","isFinal": false},
+
+        { "key":"27xf","text":"Caesalpiniaceae",
+          "isFinal": true},
+
+        { "key":"27yf","text":"Mimosaceae",
+          "isFinal": true},
+
+        { "key":"28",
+          "aText":"Capsules pyriform, winged at angles. Stanena 8.",
+          "bText":"Capsules not as above. Stanena 4.",
+          "x":"28xf",
+          "y":"28yf","isFinal": false},
+
+        { "key":"28xf","text":"Sapindaceae",
+          "isFinal": true},
+
+        { "key":"28yf","text":"Vitaceae",
+          "isFinal": true},
+
+        { "key":"29",
+          "aText":"Plants herbaceous",
+          "bText":"Plants shrubs or Trees",
+          "x":"30",
+          "y":"39","isFinal": false},
+
+        { "key":"30",
+          "aText":"Leaves lyrate.",
+          "bText":"Leaves not lyrate",
+          "x":"30xf",
+          "y":"31","isFinal": false},
+
+        { "key":"30xf","text":"Brassicaceae",
+          "isFinal": true},
+
+        { "key":"31",
+          "aText":"Leaves compound (except Cleome monophylla)",
+          "bText":"Leaves simple",
+          "x":"32",
+          "y":"35","isFinal": false},
+
+        { "key":"32",
+          "aText":"Leaves palmately compound.",
+          "bText":"Leaves pinnately compound.",
+          "x":"32xf",
+          "y":"33","isFinal": false},
+
+        { "key":"32xf","text":"Capparaceae",
+          "isFinal": true},
+
+        { "key":"33",
+          "aText":"Inf. umbellate cyme",
+          "bText":"Inf. not as above",
+          "x":"33xf",
+          "y":"34","isFinal": false},
+
+        { "key":"33xf","text":"Oxalidaceae",
+          "isFinal": true},
+
+        { "key":"34",
+          "aText":"Leaf-rachis glandular. Fls. irregular. Staminodes present.",
+          "bText":"Leaf-rachis glandular. Fls. irregular. Staminodes absent",
+          "x":"34xf",
+          "y":"34yf","isFinal": false},
+
+        { "key":"34xf","text":"Cansalpiniaceae",
+          "isFinal": true},
+
+        { "key":"34yf","text":"zygophyllaceae",
+          "isFinal": true},
+
+        { "key":"35",
+          "aText":"Coralle irregular",
+          "bText":"Corolla regular",
+          "x":"36",
+          "y":"37","isFinal": false},
+
+        { "key":"36",
+          "aText":"plants fleshy .Stipules absent.fls .not less than 3cm. acroes, Capsules many seeded (except hydrocera).",
+          "bText":"Plants not Elestry. iples peament. Fila. not more than 1 cm. across. Capacles fow needed.",
+          "x":"36xf",
+          "y":"36yf","isFinal": false},
+
+        { "key":"36xf","text":"Balsaminaceae",
+          "isFinal": true},
+
+        { "key":"36yf","text":"Violaceae",
+          "isFinal": true},
+
+        { "key":"37",
+          "aText":"Leaves alternate. Fls. not white",
+          "bText":"Leaves opposite or pseudo-shorled. Fls. mostly white (pinkish in Polycarpaea corymbose).",
+          "x":"37xf",
+          "y":"38","isFinal": false},
+
+        { "key":"37xf","text":"Sterculiaceae",
+          "isFinal": true},
+
+        { "key":"38",
+          "aText":"Leaves entire. Stipules scarious. Int. terminal, corystone cyme",
+          "bText":"Leaves crenate-serrate. Ripules ne acarious. Pls. axillary clust erad cyme.",
+          "x":"38xf",
+          "y":"38yf","isFinal": false},
+
+        { "key":"38xf","text":"Caryophyllaceae",
+          "isFinal": true},
+
+        { "key":"38yf","text":"Elatinaceae",
+          "isFinal": true},
+
+        { "key":"39",
+          "aText":"Plants armed (except Cassia)",
+          "bText":"Plants unarmed",
+          "x":"40",
+          "y":"47","isFinal": false},
+
+        { "key":"40",
+          "aText":"Leaves compound.",
+          "bText":"Leaves simple",
+          "x":"41",
+          "y":"43","isFinal": false},
+
+        { "key":"41",
+          "aText":"Pls. irregular.",
+          "bText":"Fls. regular",
+          "x":"41xf",
+          "y":"42","isFinal": false},
+
+        { "key":"41xf","text":"Caesalpiniaceae",
+          "isFinal": true},
+
+        { "key":"42",
+          "aText":"Leaflets many (not less than 20 pairs.) Fls. in globose heads.",
+          "bText":"Leaflets few (not more than 6 pairs.) Fls. not in heads.",
+          "x":"42xf",
+          "y":"42yf","isFinal": false},
+
+        { "key":"42xf","text":"Mimosaceae",
+          "isFinal": true},
+
+        { "key":"42yf","text":"Rutaceae",
+          "isFinal": true},
+
+        { "key":"43",
+          "aText":"Fruits capsule, 3-gonous. Seeds arillate.",
+          "bText":"Fruits berry, globose. Seeds not arillate.",
+          "x":"43xf",
+          "y":"44","isFinal": false},
+
+        { "key":"43xf","text":"Celastraceae",
+          "isFinal": true},
+
+        { "key":"44",
+          "aText":"Fle. unisexual.",
+          "bText":"Fls. bisexual.",
+          "x":"44xf",
+          "y":"45","isFinal": false},
+
+        { "key":"44xf","text":"Opiliaceae",
+          "isFinal": true},
+
+        { "key":"45",
+          "aText":"Thorns 4 at each node. Leaves spine-tipped",
+          "bText":"Thorna solitary or paired. Leaves not spine tipped",
+          "x":"45xf",
+          "y":"46","isFinal": false},
+
+        { "key":"45xf","text":"Salvadoraceae",
+          "isFinal": true},
+
+        { "key":"46",
+          "aText":"Leaves basally nerved. Petala reduced or absent",
+          "bText":"Thorna solitary or paired. Leaves without basal nerves, Petals vell developed.",
+          "x":"46xf",
+          "y":"46yf","isFinal": false},
+
+        { "key":"46xf","text":"rhamnaceae",
+          "isFinal": true},
+
+        { "key":"46yf","text":"Rutaceae",
+          "isFinal": true},
+
+        { "key":"47",
+          "aText":"Stamens as many as petals.",
+          "bText":"Stamens twice as many as petals or fewer",
+          "x":"48",
+          "y":"51","isFinal": false},
+
+        { "key":"48",
+          "aText":"Plants climbers or stragglers.",
+          "bText":"Plants erect.",
+          "x":"49",
+          "y":"50","isFinal": false},
+
+        { "key":"49",
+          "aText":"Plants dioecious. Leaves entire. Fls. 3-merous",
+          "bText":"Plants polygamous. Leaves dentate. Fls. 5-merous.",
+          "x":"49xf",
+          "y":"49yf","isFinal": false},
+
+        { "key":"49xf","text":"Menispermaceae",
+          "isFinal": true},
+
+        { "key":"49yf","text":"Celastraceae",
+          "isFinal": true},
+
+        { "key":"50",
+          "aText":"Fls. unisexual",
+          "bText":"Fls. bisexual.",
+          "x":"50xf",
+          "y":"50yf","isFinal": false},
+
+        { "key":"50xf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+        { "key":"50yf","text":"Anacardiaceae",
+          "isFinal": true},
+
+        { "key":"51",
+          "aText":"Fruits samaroid.",
+          "bText":"Fruits not samaroid.",
+          "x":"52",
+          "y":"53","isFinal": false},
+
+        { "key":"52",
+          "aText":"Large trees. Leaves compound. Fls. yellow.",
+          "bText":"Scandent shrubs. Leaves simple. Fls. white.",
+          "x":"52xf",
+          "y":"52yf","isFinal": false},
+
+        { "key":"52xf","text":"Simaroubaceae",
+          "isFinal": true},
+
+        { "key":"52yf","text":"Malpighiaceae",
+          "isFinal": true},
+
+        { "key":"53",
+          "aText":"Plants scandent.",
+          "bText":"Plants erect.",
+          "x":"54",
+          "y":"55","isFinal": false},
+
+       { "key":"54",
+          "aText":"Inf. axillary raceme. Staminodes present.Ovules 1 per call. Drupes half enclosed by calyx.",
+          "bText":"Inf. axillary umbel. Staminodes absent.Ovules 2 or more per call. Drupes not asabove.",
+          "x":"54xf",
+          "y":"54yf","isFinal": false},
+
+        { "key":"54xf","text":"Olacaceae",
+          "isFinal": true},
+
+        { "key":"54yf","text":"Hippocrateaceae",
+          "isFinal": true},
+
+        { "key":"55",
+          "aText":"Leaves scaly, jointed with enclosed sheathing base. Ple. in close cylindric spike.",
+          "bText":"Leaves not as above. Fle. arranged otherwise.",
+          "x":"55xf",
+          "y":"56","isFinal": false},
+
+        { "key":"55xf","text":"Tamaricaceae",
+          "isFinal": true},
+
+        { "key":"56",
+          "aText":"Leaves simple.",
+          "bText":"Leaves compound",
+          "x":"57",
+          "y":"58","isFinal": false},
+
+        { "key":"57",
+          "aText":"Leaves lobed at apex, palmately nerved.",
+          "bText":"Leaves not lobed, pinnately nerved",
+          "x":"57xf",
+          "y":"57yf","isFinal": false},
+
+        { "key":"57xf","text":"Caesalpiniaceae",
+          "isFinal": true},
+
+        { "key":"57yf","text":"Anacardiaceae",
+          "isFinal": true},
+
+        { "key":"58",
+          "aText":"Leaves with pellucid gland beneath",
+          "bText":"Leaves without glands.",
+          "x":"58xf",
+          "y":"59","isFinal": false},
+
+        { "key":"58xf","text":"Rutaceae",
+          "isFinal": true},
+
+        { "key":"59",
+          "aText":"Filaments united forming staminal tube.",
+          "bText":"Filaments free from each other.",
+          "x":"59xf",
+          "y":"60","isFinal": false},
+
+        { "key":"59xf","text":"Meliaceae",
+          "isFinal": true},
+
+        { "key":"60",
+          "aText":"Leaves and drupes aromatic, mango smelling.(except Lannea).",
+          "bText":"Leaves and drupes not as above.",
+          "x":"60xf",
+          "y":"61","isFinal": false},
+
+        { "key":"60xf","text":"Anacardiaceae",
+          "isFinal": true},
+
+        { "key":"61",
+          "aText":"Fls. in globose head (except Adenanthera).",
+          "bText":"Fls. not in globose head.",
+          "x":"61xf",
+          "y":"62","isFinal": false},
+
+        { "key":"61xf","text":"Mimosaceae",
+          "isFinal": true},
+
+        { "key":"62",
+          "aText":"Leaflets many (15-17 pairs), small (0.4-1.0cm. long). Pls. yellowish with pinkish dots.",
+          "bText":"Leaflets few (1-4 pairs), large (1.5-5.0 cm. long). Fls. white (except Cymometra).",
+          "x":"62xf",
+          "y":"63","isFinal": false},
+
+        { "key":"62xf","text":"Caesalpiniaceae",
+          "isFinal": true},
+
+        { "key":"63",
+          "aText":"Fls. polygamous. Stamens 8.",
+          "bText":"Fls. bisexual. Stamens not as above.",
+          "x":"63xf",
+          "y":"64","isFinal": false},
+
+        { "key":"63xf","text":"Sapindaceae",
+          "isFinal": true},
+
+        { "key":"64",
+          "aText":"Leaflets entire. Fls. zygomorphic",
+          "bText":"Leaflets serrate. Pls. actinomorphic",
+          "x":"64xf",
+          "y":"64yf","isFinal": false},
+
+        { "key":"64xf","text":"Caesalpiniaceae",
+          "isFinal": true},
+
+        { "key":"64yf","text":"Burseraceae",
+          "isFinal": true}
+
+        ],
+  
+  "group2" : [
+        { "key":"1", 
+          "aText": "Plants aquatic",
+          "bText": "Plants terrestrial",
+          "x": "2", 
+          "y": "5", "isFinal": false },
+        { "key":"2", 
+          "aText": "Rhizomes present. Petals many",
+          "bText": "Rhizomes absent. Petals 2-5.",
+          "x": "2xf", 
+          "y": "3", "isFinal": false },
+
+        { "key":"2xf","text":"Nymphaeaceae",
+          "isFinal": true},
+
+        { "key":"3", 
+          "aText": "Leaves submerged; leaves linear or finely dissected into filiform segments. Pls. in axillary clustered cyme",
+          "bText": "Leaves floating, solitary. obovate or rhomboid. Pls. axillary",
+          "x": "3xf", 
+          "y": "4", "isFinal": false },
+         
+       { "key":"3xf","text":"Haloragraceae",
+          "isFinal": true},
+
+       { "key":"4", 
+          "aText": "Leaves rhomboid, dentate. Fls.4-merous. Capsules with 2 horns",
+          "bText": "Leaves obovate or oblanceolate, entire. Pls. 5-merous. Capsules without horns",
+          "x": "4xf", 
+          "y": "4yf", "isFinal": false },
+
+        { "key":"4xf","text":"Trapaceae",
+          "isFinal": true},
+
+        { "key":"4yf","text":"Onagraceae",
+          "isFinal": true},
+
+        { "key":"5", 
+          "aText": "Plant a thorny or spinous.",
+          "bText": "Plants unarmed",
+          "x": "6", 
+          "y": "8", "isFinal": false },
+
+        { "key":"6", 
+          "aText": "Stems flattened or columinar, joint ed. Stamens indefinite. Becry spiny or brietly.",
+          "bText": "Stems flattened or columinar, joint ed. Stamens indefinite. Becry spiny or brietly.",
+          "x": "6xf", 
+          "y": "7", "isFinal": false },
+
+        { "key":"6xf","text":"Cactaceae",
+          "isFinal": true},
+
+        { "key":"7", 
+          "aText": "Inf. axillary cyme. Fle. white. Sepals and petals 10 each. Petals recurved.",
+          "bText": "Inf. axillary cyme. Fle. white. Sepals and petals 10 each. Petals recurved.",
+          "x": "7xf", 
+          "y": "7yf", "isFinal": false },
+
+        { "key":"7xf","text":"Alangiaceae",
+          "isFinal": true},
+
+        { "key":"7yf","text":"Lythraceae",
+          "isFinal": true},
+
+        { "key":"8", 
+          "aText": "Herbs.",
+          "bText": "trees or shrubs",
+          "x": "9", 
+          "y": "14", "isFinal": false },
+
+        { "key":"9", 
+          "aText": "Plants prost rate. Fls. in umbellate cyme",
+          "bText": "Plants erect. Inf. otherwise.",
+          "x": "9xf", 
+          "y": "10", "isFinal": false },
+
+        { "key":"9xf","text":"Apiaceae",
+          "isFinal": true},
+
+        { "key":"10", 
+          "aText": "Plants insectivorous. Leaves glandular-hairy.",
+          "bText": "Plants not insectivorous. Leaves not so",
+          "x": "10xf", 
+          "y": "11", "isFinal": false },
+
+        { "key":"10xf","text":"Droseraceae",
+          "isFinal": true},
+
+        { "key":"11", 
+          "aText": "Fls. yellow.",
+          "bText": "Pls, other than yellow.",
+          "x": "11xf", 
+          "y": "12", "isFinal": false },
+
+        { "key":"11xf","text":"Onagraceae",
+          "isFinal": true},
+
+        { "key":"12", 
+          "aText": "Inf. terminal cyme. Calyx stellately brist ly",
+          "bText": "Int. axillary, clustered cyme. Calyx not as above.",
+          "x": "12xf", 
+          "y": "13", "isFinal": false },
+
+        { "key":"12xf","text":"Melastomataceae",
+          "isFinal": true},
+
+        { "key":"13", 
+          "aText": "fls. white. Styles 2",
+          "bText": "Fls. pale-rosy. Style one",
+          "x": "13xf", 
+          "y": "13yf", "isFinal": false },
+
+        { "key":"13xf","text":"Vahliaceae",
+          "isFinal": true},
+
+        { "key":"13yf","text":"Lythraceae",
+          "isFinal": true},
+
+        { "key":"14", 
+          "aText": "Climbers / Stragglers.",
+          "bText": "Plants not climbing",
+          "x": "15", 
+          "y": "17", "isFinal": false },
+
+        { "key":"15", 
+          "aText": "Plante tendril bearing. Stamens 5.",
+          "bText": "Plants without tendril. Stanens",
+          "x": "16", 
+          "y": "15yf", "isFinal": false },
+
+        { "key":"15yf","text":"Combretaceae",
+          "isFinal": true},
+
+        { "key":"16", 
+          "aText": "Leaves palmately 3-lobed, foetid, glandular beneath. Bracts laciniate. Fruits baccate",
+          "bText": "Leaves and bracts not as above. Fruits winged",
+          "x": "16xf", 
+          "y": "16yf", "isFinal": false },
+
+        { "key":"16xf","text":"Passifloraceae",
+          "isFinal": true},
+
+        { "key":"16yf","text":"Rhamnaceae",
+          "isFinal": true},
+
+        { "key":"17", 
+          "aText": "Secondary nerves obscure.",
+          "bText": "Secondary nerves of the leaves prominent",
+          "x": "18", 
+          "y": "21", "isFinal": false },
+
+        { "key":"18", 
+          "aText": "Fls. blue. Stamens 8. Berry dark purple. Plants not littoral.",
+          "bText": "Fls. not as above. Stamens 10 or more. Berry red or green. Plants littoral (except Carallia).",
+          "x": "18xf", 
+          "y": "19", "isFinal": false },
+
+        { "key":"18xf","text":"Melastomataceae",
+          "isFinal": true},
+
+        { "key":"19", 
+          "aText": "Inf. terminal raceme or spike",
+          "bText": "Inf. axillary condensed or 3-chotomous cyme.",
+          "x": "19xf", 
+          "y": "20", "isFinal": false },
+
+        { "key":"19xf","text":"Combretaceae",
+          "isFinal": true},
+
+        { "key":"20", 
+          "aText": "Fls. large (not less than 3.0 cm. across). white with purple blotch. Stamena nany.",
+          "bText": "Fls. amall (not more than 2.0 cm. across).yellow or white, without purple blotch.Stamens 8-26 (except Kandelia",
+          "x": "20xf", 
+          "y": "20yf", "isFinal": false },
+
+        { "key":"20xf","text":"Sonneratiaceae",
+          "isFinal": true},
+
+        { "key":"20yf","text":"Rhizophoraceae",
+          "isFinal": true},
+
+        { "key":"21", 
+          "aText": "Starens 10 or less",
+          "bText": "Stamens more than 10.",
+          "x": "22", 
+          "y": "24", "isFinal": false },
+
+        { "key":"22", 
+          "aText": "Petals absent. Stamena 5+5. Fruits winged or angled.",
+          "bText": "Petals present. Stamens not as above. Pruitt's neither angled nor winged.",
+          "x": "22xf", 
+          "y": "23", "isFinal": false },
+
+        { "key":"22xf","text":"Combretaceae",
+          "isFinal": true},
+
+        { "key":"23", 
+          "aText": "Leaves serrate. Fls. white. Stamens similar, as many an petals.",
+          "bText": "Leaves entire. Fls. mauve-purple. Stamena dimorphic, twice as many as petals.",
+          "x": "23xf", 
+          "y": "23yf", "isFinal": false },
+
+        { "key":"23xf","text":"Flacourtiaceae",
+          "isFinal": true},
+
+        { "key":"23yf","text":"Melastomtacese",
+          "isFinal": true},
+
+        { "key":"24", 
+          "aText": "Leaves alternate, clustered at the apices. Fruits baccate or angular.",
+          "bText": "Leaves opposite, not clustered at the apices. Fruits not as above.",
+          "x": "24xf", 
+          "y": "25", "isFinal": false },
+
+        { "key":"24xf","text":"Lecythidaceae",
+          "isFinal": true},
+
+        { "key":"25", 
+          "aText": "Leaves aromatic when bruised. Fls. mall (not more than 0.5 cm. acrosa): mostly white",
+          "bText": "Leaves not aromatic. Pls. large (not less than 1.0 cm. across): mauve or purple (except Lageret roemia parviflora)",
+          "x": "25xf", 
+          "y": "25yf", "isFinal": false },
+
+        { "key":"25xf","text":"Myrtaceae",
+          "isFinal": true},
+
+        { "key":"25yf","text":"Lythraceae   ",
+          "isFinal": true}
+],
+
+  "group3" : [
+        { "key":"1", 
+          "aText": "Ovary inferior or semi-inferior",
+          "bText": "Ovary superior.",
+          "x": "2", 
+          "y": "6", "isFinal": false },
+        { "key":"2", 
+          "aText": "Petals with tendrils. Placentation parietal.",
+          "bText": "Plants without tendril. Placentation other than parietal.",
+          "x": "2xf", 
+          "y": "3", "isFinal": false },
+
+        { "key":"2xf","text":"Cucurbitaceae",
+          "isFinal": true},
+
+        { "key":"3", 
+          "aText": "Inf. capitulum or fla. aggregated in a head (except Gnaphalium polucaulon). Calyx often reduced to pappus..",
+          "bText": "Inf. not as above. Calyx well-developed. 4. Leaves opposite. Stipules inter or intra-petiolar..",
+          "x": "3xf", 
+          "y": "4", "isFinal": false },
+
+        { "key":"3xf","text":"Asteraceae",
+          "isFinal": true},
+
+        { "key":"4", 
+          "aText": "Leaves opposite. Stipules inter or intra-petiolar.",
+          "bText": "Leaves alternate, exstipulate.",
+          "x": "4xf", 
+          "y": "5", "isFinal": false },
+
+        { "key":"4xf","text":"Rubiaceae",
+          "isFinal": true},
+
+        { "key":"5", 
+          "aText": "Leaves opposite. Stipules inter or intra-petiolar.",
+          "bText": "Leaves alternate, exstipulate.",
+          "x": "5xf", 
+          "y": "5yf", "isFinal": false },
+
+        { "key":"5xf","text":"Sphenocleaceae",
+          "isFinal": true},
+
+        { "key":"5yf","text":"Campanulaceae",
+          "isFinal": true},
+
+        { "key":"6", 
+          "aText": "Plants insect ivorous or parasitic. Leaves inconspicuous or absent.",
+          "bText": "plants not an above. Leaves well developed.",
+          "x": "7", 
+          "y": "9", "isFinal": false },
+
+        { "key":"7", 
+          "aText": "Stem twining. Corolla actinomorphic. Ovules 4.",
+          "bText": "Stem not twining. Corolla zygomorphic. Ovules many.",
+          "x": "7xf", 
+          "y": "8", "isFinal": false },
+
+        { "key":"7xf","text":"Cuacut acese",
+          "isFinal": true},
+
+        { "key":"8", 
+          "aText": "Aquatic or marahy, alender herba: usually insectivorous. Stamens 2.",
+          "bText": "Terrestrial, et out herba: root parasites or saprophytes. Stamens 4.",
+          "x": "8xf", 
+          "y": "8yf", "isFinal": false },
+
+        { "key":"8xf","text":"Lentibulariaceae",
+          "isFinal": true},
+
+        { "key":"8yf","text":"Orobanchaceae",
+          "isFinal": true},
+
+        { "key":"9", 
+          "aText": "Aquatic or marahy, alender herba: usually insectivorous. Stamens 2.",
+          "bText": "Terrestrial, et out herba: root parasites or saprophytes. Stamens 4.",
+          "x": "9xf", 
+          "y": "10", "isFinal": false },
+
+        { "key":"9xf","text":"Crassulacene",
+          "isFinal": true},
+
+        { "key":"10", 
+          "aText": "Plants dioecious. Fls. unisexual.",
+          "bText": "Plants monoecious. Fls. bisexual.",
+          "x": "10xf", 
+          "y": "11", "isFinal": false },
+
+        { "key":"10xf","text":"Ebenaceae",
+          "isFinal": true},
+
+        { "key":"11", 
+          "aText": "Leaves compound",
+          "bText": "leaves simple.",
+          "x": "12", 
+          "y": "16", "isFinal": false },
+
+          { "key":"12", 
+          "aText": "Fls. in globose head or in spike. Fruits legume or lomentum.",
+          "bText": "Fls. neither in globose head nor in spike. Fruits drueps or capsules.",
+          "x": "12xf", 
+          "y": "13", "isFinal": false },
+
+        { "key":"12xf","text":"Mimosaceae",
+          "isFinal": true},
+ 
+        { "key":"13", 
+          "aText": "Erect herbs. Inf. terminal umbel. Stamens 10.",
+          "bText": "Large shrubs or tree. ",
+          "x": "13xf", 
+          "y": "14", "isFinal": false },
+
+        { "key":"13xf","text":"Oxalidaceae",
+          "isFinal": true},
+
+        { "key":"14", 
+          "aText": "Leaves palmately compound.",
+          "bText": "Leaves pinnately compound ",
+          "x": "14xf", 
+          "y": "15", "isFinal": false },
+
+        { "key":"14xf","text":"Verbenaceae",
+          "isFinal": true},
+
+        { "key":"15", 
+          "aText": "Inf. terminal raceme. Corolla creamish yellow. Ovules many.",
+          "bText": "Inf. leaf-opposed, corymbose Corolla greenish-white. Ovary 1-ovuled. cyme ",
+          "x": "15xf", 
+          "y": "15yf", "isFinal": false },
+
+        { "key":"15xf","text":"Bignoniaceae",
+          "isFinal": true},
+
+        { "key":"15xf","text":"Leeaceae",
+          "isFinal": true},
+       
+        { "key":"16", 
+          "aText": "Leaves alternate or apparently sub-opposite.",
+          "bText": "Leven opposite or whorled (except Corbera manghan).",
+          "x": "17", 
+          "y": "27", "isFinal": false },
+
+
+        { "key":"17", 
+          "aText": "Starena opposite the petals.",
+          "bText": "Stamens alternate with petals.",
+          "x": "18", 
+          "y": "21", "isFinal": false },
+
+        { "key":"18", 
+          "aText": "Treen, laticiferous. Stamens more than corolla lobes.",
+          "bText": "Herbs or shrubs, not laticiferous. Stamens as many as or less than corolla lobes.",
+          "x": "18xf", 
+          "y": "19", "isFinal": false },
+
+        { "key":"18xf","text":"Sapotaceae",
+          "isFinal": true},
+
+        { "key":"19", 
+          "aText": "Plovers salver-shaped. Calyx with stalked glande (except Aegialitis). Styles 5.",
+          "bText": "Flowers rotate. Calyx eglandular. Style 1.",
+          "x": "19xf", 
+          "y": "20", "isFinal": false },
+
+        { "key":"19xf","text":"Plumbaginaceae",
+          "isFinal": true},
+
+        { "key":"20", 
+          "aText": "Large shrubs. Leaves usually gland-dotted. Pla. pink or white, fleshy. Fruits follicle or drupe",
+          "bText": "Herbs. Leaves not gland dotted. Fls. blue. Perianth not fleshy. Fruits capsule.",
+          "x": "20xf", 
+          "y": "20yf", "isFinal": false },
+
+        { "key":"20xf","text":"Myrsinaceae",
+          "isFinal": true},
+
+        { "key":"20yf","text":"Primulaceae",
+          "isFinal": true},
+
+        { "key":"21", 
+          "aText": "Plants floating. Leaves orbicular.",
+          "bText": "Plants not floating (except Ipomoea aquatica).",
+          "x": "21xf", 
+          "y": "22", "isFinal": false },
+
+        { "key":"21xf","text":"Menyanthaceae",
+          "isFinal": true},
+
+        { "key":"22", 
+          "aText": "Ovules one or two in each loculea..",
+          "bText": "Oralee many in each loculus.",
+          "x": "23", 
+          "y": "24", "isFinal": false },
+
+        { "key":"24", 
+          "aText": "Fls. blue. Filaments exceeding the corolla tube.",
+          "bText": "Fis. not blue. Filaments included in the corolla tube.",
+          "x": "24xf", 
+          "y": "25", "isFinal": false },
+
+        { "key":"24xf","text":"Hydrophyllaceae",
+          "isFinal": true},
+
+        { "key":"25", 
+          "aText": "Corolla ventricose. Fruits distinctly grooved or provided with spines.",
+          "bText": "Corolla not ventricose. Fruits not as above.",
+          "x": "24xf", 
+          "y": "26", "isFinal": false },
+
+        { "key":"25xf","text":"Pedaliacene",
+          "isFinal": true},
+
+        { "key":"26", 
+          "aText": "Corolla yellow. Statens 4. Fruit a capsule. Placentation median.",
+          "bText": "Corolla purple or white. Stanna 5. Fruit a berry.Placentation oblique..",
+          "x": "26xf", 
+          "y": "26yf", "isFinal": false },
+
+        { "key":"26xf","text":"Scrophulariaceae",
+          "isFinal": true},
+
+        { "key":"26yf","text":"Solanaceae",
+          "isFinal": true},
+
+        { "key":"27", 
+          "aText": "Plants with milky latex. Anthars connate or connivent around the stigma.",
+          "bText": "Plants without lates. Anthers free.",
+          "x": "28", 
+          "y": "29", "isFinal": false },
+
+        { "key":"28", 
+          "aText": "Nectariferous corona present. Anthers Insuperable. connate with stigma (Gyrategium). Pollon assed collected into pollinia.",
+          "bText": "Nectarifercus corona about. Anthers separable,convenient around the stigma. Pallen masses not collected into pollinis.",
+          "x": "28xf", 
+          "y": "28yf", "isFinal": false },
+
+        { "key":"28xf","text":"Asclepiadaceae.",
+          "isFinal": true},
+
+        { "key":"28yf","text":"Apocynaceae",
+          "isFinal": true},
+
+        { "key":"29", 
+          "aText": "Corolla regular or sub-cupular.",
+          "bText": "Corolla irregular.",
+          "x": "30", 
+          "y": "34", "isFinal": false },
+
+        { "key":"30", 
+          "aText": "Ovary one-called.",
+          "bText": "Ovary two-celled..",
+          "x": "31", 
+          "y": "32", "isFinal": false },
+
+        { "key":"31", 
+          "aText": "Straggling shrubs. Leaves flechy. Inf. terminal panicle.Placentation basal.pollinia.",
+          "bText": "Straggling shrubs. Leaves flechy. Inf. terminal panicle.Placentation basal.",
+          "x": "31xf", 
+          "y": "31yf", "isFinal": false },
+
+        { "key":"31xf","text":"Salvadoraceae.",
+          "isFinal": true},
+
+        { "key":"31yf","text":"Gentianaceae",
+          "isFinal": true},
+
+        { "key":"32", 
+          "aText": "Stamens 2..",
+          "bText": "Stamens as many as corolla-lobes..",
+          "x": "32xf", 
+          "y": "33", "isFinal": false },
+
+        { "key":"32xf","text":"Oleaceae",
+          "isFinal": true},
+
+        { "key":"33", 
+          "aText": "Plants littoral. Leaves pinnately nerved. Inf. axillary or terminal 3-chotomous panicle.Corolla.",
+          "bText": "Plants not littoral. Leaves palmately nerved. Inf. axillary solitary or cyme. Corolla white.Ovules",
+          "x": "33xf", 
+          "y": "33yf", "isFinal": false },
+
+        { "key":"33xf","text":"Avicenniaceae.",
+          "isFinal": true},
+
+        { "key":"33yf","text":"Loganiaceae",
+          "isFinal": true},
+
+        { "key":"34", 
+          "aText": "Corolla distinctly bi-lipped..",
+          "bText": "Corolla not distinctly bi-lipped.",
+          "x": "35", 
+          "y": "37", "isFinal": false },
+
+        { "key":"35", 
+          "aText": "Styles gynobasic..",
+          "bText": "Styles not gynobasic.",
+          "x": "35xf", 
+          "y": "36", "isFinal": false },
+
+        { "key":"35xf","text":"Lamiaceae",
+          "isFinal": true},
+
+        { "key":"36", 
+          "aText": "Fertile stamens 2..",
+          "bText": "Fertile stamens 4.",
+          "x": "36xf", 
+          "y": "36yf", "isFinal": false },
+
+        { "key":"36xf","text":"Acanthaceae",
+          "isFinal": true},
+
+         { "key":"36yf","text":"Scrophulariaceae",
+          "isFinal": true},
+
+        { "key":"37", 
+          "aText": "Corolla glandular pubescent. Capsules tipped with hooked spines.",
+          "bText": "Corolla eglandular. Fruits not as above.",
+          "x": "37xf", 
+          "y": "38", "isFinal": false },
+
+        { "key":"37xf","text":"Martyniaceae",
+          "isFinal": true},
+
+        { "key":"38", 
+          "aText": "Seeds with retinacula (except Nelsonia).",
+          "bText": "Seeds without retinacula.",
+          "x": "38xf", 
+          "y": "39", "isFinal": false },
+
+        { "key":"38xf","text":"Acanthaceae",
+          "isFinal": true},
+
+       { "key":"39", 
+          "aText": "Corolla bilipped except (Scoparia). Ovulee many in each cell.",
+          "bText": "Corolla not bilipped ovules few (1-2 only) in each cell.",
+          "x": "39xf", 
+          "y": "39yf", "isFinal": false },
+
+        { "key":"39xf","text":"Scrophulariaceae",
+          "isFinal": true},
+
+         { "key":"39yf","text":"Verbenaceae",
+          "isFinal": true}
+],
+
+  "group4" : [
+        { "key":"1", 
+          "aText": "Plants aquatic",
+          "bText": "Plants terrestrial.",
+          "x": "2", 
+          "y": "3", "isFinal": false },
+
+        { "key":"2", 
+          "aText": "Fls. solitary, axillary. Stamens 16-24. Stigma simple.",
+          "bText": "Fls. in terminal spike. Stamens 4. Stigma plumose.",
+          "x": "2xf", 
+          "y": "2yf", "isFinal": false },
+
+        { "key":"2xf","text":"Ceratophyllaceae",
+          "isFinal": true},
+
+        { "key":"2yf","text":"Haloragaceae",
+          "isFinal": true},
+
+        { "key":"3", 
+          "aText": "Plants epiphytic.",
+          "bText": "Plants not epiphytic.",
+          "x": "4", 
+          "y": "6", "isFinal": false },
+
+           { "key":"4", 
+          "aText": "Leafless twinners.",
+          "bText": "Plants not twinning, leafy (except Viscum nepalense).",
+          "x": "4xf", 
+          "y": "5", "isFinal": false },
+
+        { "key":"4xf","text":"Lauraceae",
+          "isFinal": true},
+
+        { "key":"5", 
+          "aText": "Flowers bisexual.",
+          "bText": "Fls. unisexual.",
+          "x": "5xf", 
+          "y": "5yf", "isFinal": false },
+
+        { "key":"5xf","text":"Loranthaceae",
+          "isFinal": true},
+
+        { "key":"5yf","text":"Viscaceae",
+          "isFinal": true},
+
+        { "key":"6", 
+          "aText": "Plants climbing or straggling.",
+          "bText": "Plants not climbing.",
+          "x": "7", 
+          "y": "16", "isFinal": false },
+
+        { "key":"7", 
+          "aText": "Achenes with feathery style.",
+          "bText": "Fruits without feathery style",
+          "x": "7xf", 
+          "y": "8", "isFinal": false },
+
+        { "key":"7xf","text":"Ranunculaceae",
+          "isFinal": true},
+
+        { "key":"8", 
+          "aText": "Plante armed.",
+          "bText": "Plants unarmed.",
+          "x": "9", 
+          "y": "12", "isFinal": false },
+
+        { "key":"9", 
+          "aText": "Plants with milky latex. Inf. axillary, globose head.",
+          "bText": "Plants without milky latex. Inf. not as above.",
+          "x": "9xf", 
+          "y": "10", "isFinal": false },
+
+        { "key":"9xf","text":"Moraceae",
+          "isFinal": true},
+
+        { "key":"10", 
+          "aText": "Thorns straight. Leaves glandular pubescent. Inf. terminal panicled racené.",
+          "bText": "Thorns recurved. Leaves not as above. Inf. axillary or terminal cyme.",
+          "x": "10xf", 
+          "y": "10yf", "isFinal": false },
+
+        { "key":"10xf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+        { "key":"10yf","text":"Rhamnaceae",
+          "isFinal": true},
+
+          { "key":"10", 
+          "aText": "Thorns straight. Leaves glandular pubescent. Inf. terminal panicled racené.",
+          "bText": "Thorns recurved. Leaves not as above. Inf. axillary or terminal cyme.",
+          "x": "10xf", 
+          "y": "10yf", "isFinal": false },
+
+        { "key":"10xf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+        { "key":"11", 
+          "aText": "Fls. bisexual. Fruit a drupe.",
+          "bText": "Fls. polygamous. Fruits anthocarps.",
+          "x": "11xf", 
+          "y": "11yf", "isFinal": false },
+
+        { "key":"11xf","text":"Rhamnaceae",
+          "isFinal": true},
+
+        { "key":"11yf","text":"Nyctaginaceae",
+          "isFinal": true},
+
+        { "key":"12", 
+          "aText": "Plants tendrillate. Ochreate stipule present. Fls.rose-purple.",
+          "bText": "Plants without tendril. Ochreate stipule absent.",
+          "x": "12xf", 
+          "y": "13", "isFinal": false },
+
+        { "key":"12xf","text":"Polygonaceae",
+          "isFinal": true},
+
+        { "key":"13", 
+          "aText": "Plants with stinging hairs. Ovary deeply 3-lobed.",
+          "bText": "Plants without stinging hairs. Ovary not as above.",
+          "x": "13xf", 
+          "y": "14", "isFinal": false },
+
+        { "key":"13xf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+          { "key":"14", 
+          "aText": "Leaves panduriform. Perianths 6-lobed. Fruits globose capsule.",
+          "bText": "Leaves not as above. Perianths 5-lobed. Fruits not as above",
+          "x": "14xf", 
+          "y": "15", "isFinal": false },
+
+        { "key":"14xf","text":"Aristolochiaceae",
+          "isFinal": true},
+
+           { "key":"15", 
+          "aText": "Leaves alternate, cordate. Pls. unisexual.",
+          "bText": "Leaves opposite, cuneate. Fls. bisexual",
+          "x": "15xf", 
+          "y": "15yf", "isFinal": false },
+
+        { "key":"15xf","text":"Piperaceae",
+          "isFinal": true},
+
+          { "key":"15yf","text":"Combretaceae",
+          "isFinal": true},
+
+          { "key":"16", 
+          "aText": "Plants armed with spines.",
+          "bText": "Berbe (except Boehmeria which is an underahrub).",
+          "x": "17", 
+          "y": "30", "isFinal": false },
+
+          { "key":"17", 
+          "aText": "Plants armed with spines.",
+          "bText": "Plants unarmed.",
+          "x": "18", 
+          "y": "20", "isFinal": false },
+
+          { "key":"18", 
+          "aText": "Stamens many. Styles 6-7.",
+          "bText": "Stamens few. Styles 2-4.",
+          "x": "18xf", 
+          "y": "19", "isFinal": false },
+
+        { "key":"18xf","text":"Flacourtiaceae",
+          "isFinal": true},
+
+          { "key":"19", 
+          "aText": "Plants with milky latex. Fls. unisexual. Tepals 3-4.",
+          "bText": "Plants without milky latex. Fls. bisexual. Tepals 5.",
+          "x": "19xf", 
+          "y": "19yf", "isFinal": false },
+
+        { "key":"19xf","text":"Moraceae",
+          "isFinal": true},
+
+           { "key":"19yf","text":"Rhamnaceae",
+          "isFinal": true},
+
+           { "key":"20", 
+          "aText": "Fls. fragrant. Perianths many-seriate.",
+          "bText": "Fls.not fragrant. Perianths 1 or 2 seriate.",
+          "x": "20xf", 
+          "y": "21", "isFinal": false },
+
+        { "key":"20xf","text":"Magnoliaceae",
+          "isFinal": true},
+
+          { "key":"21", 
+          "aText": "Ovary inferior or semi-inferior.",
+          "bText": "Ovary superior.",
+          "x": "22", 
+          "y": "25", "isFinal": false },
+
+          { "key":"22", 
+          "aText": "Els. arranged in globose head.",
+          "bText": "Fls. not as above.",
+          "x": "22xf", 
+          "y": "23", "isFinal": false },
+
+        { "key":"22xf","text":"Asteraceae",
+          "isFinal": true},
+
+          { "key":"23", 
+          "aText": "Stamens numerous.",
+          "bText": "Stamens 10 or less.",
+          "x": "23xf", 
+          "y": "24", "isFinal": false },
+
+        { "key":"23xf","text":"Sonneratiaceae",
+          "isFinal": true},
+
+          { "key":"24", 
+          "aText": "Petals absent. Stamens less than 10. Seeds arillate.",
+          "bText": "Petala present. Stamens 10. Seeds not arillate.",
+          "x": "24xf", 
+          "y": "24yf", "isFinal": false },
+
+        { "key":"24xf","text":"Placourtiaceae",
+          "isFinal": true},
+
+           { "key":"24yf","text":"Combretaceae",
+          "isFinal": true},
+
+          { "key":"25", 
+          "aText": "Leaves aromatic when bruished. Unbels surrounding by 4-5bract",
+          "bText": "Leaves and inf. not as above.",
+          "x": "25xf", 
+          "y": "26", "isFinal": false },
+
+        { "key":"25xf","text":"Lauraceae",
+          "isFinal": true},
+
+           { "key":"26", 
+          "aText": "Flowers aggregated inside fleshy receptacle.",
+          "bText": "Fls. not so arranged.",
+          "x": "26xf", 
+          "y": "27", "isFinal": false },
+
+        { "key":"26xf","text":"Moraceae",
+          "isFinal": true},
+
+           { "key":"27", 
+          "aText": "Leaves digitate or lobed. Fls. orange or purplish inside. Ovary 4-5 celled.",
+          "bText": "Leaves not as above. Fls. greenish or cream coloured.",
+          "x": "27xf", 
+          "y": "28", "isFinal": false },
+
+        { "key":"27xf","text":"Sterculiaceae",
+          "isFinal": true},
+
+           { "key":"28", 
+          "aText": "Leaves compound, reddish when young.",
+          "bText": "Leaves simple not as above.",
+          "x": "28xf", 
+          "y": "29", "isFinal": false },
+
+        { "key":"28xf","text":"Sapindaceae",
+          "isFinal": true},
+
+           { "key":"29", 
+          "aText": "Stamens isomerous. Ovary bicarpellary. Stigmas bifid.",
+          "bText": ".Stamens not isonerous. Ovary tricarpellary. Stigmas 3-fid.",
+          "x": "29xf", 
+          "y": "29yf", "isFinal": false },
+
+        { "key":"29xf","text":"Ulmaceae",
+          "isFinal": true},
+
+          { "key":"29yf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+          { "key":"30", 
+          "aText": "Leaves alternate",
+          "bText": "Leaves opposite or whorled",
+          "x": "31", 
+          "y": "35", "isFinal": false },
+
+           { "key":"31", 
+          "aText": "Stipules ochreate.",
+          "bText": "Stipules absent, if present not ochreate.",
+          "x": "31xf", 
+          "y": "32", "isFinal": false },
+
+        { "key":"31xf","text":"Polygonaceae",
+          "isFinal": true},
+
+          { "key":"32", 
+          "aText": "Stipules ochreate.",
+          "bText": "Periantha acarious. Tepale not accrescent.",
+          "x": "32xf", 
+          "y": "33", "isFinal": false },
+
+        { "key":"32xf","text":"Chenopodiaceae",
+          "isFinal": true},
+
+          { "key":"33", 
+          "aText": "Ovary 3-celled; usually 3-ovuled.",
+          "bText": "Ovary not as above",
+          "x": "33xf", 
+          "y": "34", "isFinal": false },
+
+        { "key":"33xf","text":"Euphorbiaceae",
+          "isFinal": true},
+
+           { "key":"34", 
+          "aText": "Fls. unisexual. Styles linear or filiform.",
+          "bText": "Pls. bisexual. Style not as above",
+          "x": "34xf", 
+          "y": "34yf", "isFinal": false },
+
+        { "key":"34xf","text":"Urticaceae",
+          "isFinal": true},
+
+          { "key":"34yf","text":"Amaranthaceae",
+          "isFinal": true},
+
+           { "key":"35", 
+          "aText": "Fls. aggregated in the form of globose or cylindrical clustered spike. Tepala aristate.",
+          "bText": "Pls. not as above. Tepals not aristate.",
+          "x": "35xf", 
+          "y": "36", "isFinal": false },
+
+        { "key":"35xf","text":"Amaranthaceae",
+          "isFinal": true},
+
+          { "key":"36", 
+          "aText": "Plants prostrate.",
+          "bText": "Plante erect.",
+          "x": "37", 
+          "y": "40", "isFinal": false },
+
+           { "key":"37", 
+          "aText": "Leaves reniform or orbicular. Ple in umbellate cyme.",
+          "bText": "Leaves not as above. Fls. axillary solitary",
+          "x": "37xf", 
+          "y": "38", "isFinal": false },
+
+        { "key":"37xf","text":"Apiaceae",
+          "isFinal": true},
+
+          { "key":"38", 
+          "aText": "Teapals pink. Ovary 1-ovuled. Fruits ribbed and glandular.",
+          "bText": "Tepala greenish-shite. Ovary many ovuled. Fruit not an above.",
+          "x": "38xf", 
+          "y": "39", "isFinal": false },
+
+        { "key":"38xf","text":"Nyctaginaceae",
+          "isFinal": true},
+
+           { "key":"39", 
+          "aText": "Stamens inserted on calys-tube, 1. (except Sesuvium).",
+          "bText": "Stamena hypogynous, 3-5.20",
+          "x": "39xf", 
+          "y": "39yf", "isFinal": false },
+
+        { "key":"39xf","text":"Aizoaceae",
+          "isFinal": true},
+
+          { "key":"39yf","text":"Molluginaceae",
+          "isFinal": true},
+
+          { "key":"40", 
+          "aText": "Hypanthium present. Fle. axillary",
+          "bText": "Hypanthium absent. Fls. in terminal spike. Ovary superior",
+          "x": "40xf", 
+          "y": "40yf", "isFinal": false },
+
+        { "key":"40xf","text":"Lythraceae",
+          "isFinal": true},
+
+          { "key":"40yf","text":"Piperaceae",
+          "isFinal": true}
+],
+
+  "group5" : [
+          { "key":"1", 
+          "aText": "Plant body very much reduced, represented by 1 or 2 fronds only.",
+          "bText": "Plant body well-developed.",
+          "x": "1xf", 
+          "y": "2", "isFinal": false },
+
+          { "key":"1xf","text":"Lemnaceae",
+          "isFinal": true},
+
+          { "key":"2", 
+          "aText": "Perianth represented by glumes or reduced to scales or bristles",
+          "bText": "Perianth well-differentiated.",
+          "x": "3", 
+          "y": "8", "isFinal": false },
+
+           { "key":"3", 
+          "aText": "Plants woody.",
+          "bText": "Planta herbaceous",
+          "x": "4", 
+          "y": "5", "isFinal": false },
+
+          { "key":"4", 
+          "aText": "Plants dioecious. Leaves spiralled, spinescent. Fls. arranged in spadix, strongly fragrant.Spathes present.",
+          "bText": "Plants monoecious. Leaves distichous, not spinescent. Fls. arranged in spikelets. Spathes absent.",
+          "x": "4xf", 
+          "y": "4yf", "isFinal": false },
+
+          { "key":"4xf","text":"Pandanaceae",
+          "isFinal": true},
+
+          { "key":"4yf","text":"Poaceae",
+          "isFinal": true},
+
+          { "key":"5", 
+          "aText": "Inf. Spadix",
+          "bText": "Inf. otherwise",
+          "x": "5xf", 
+          "y": "6", "isFinal": false },
+
+          { "key":"5xf","text":"Aracese",
+          "isFinal": true},
+
+          { "key":"6", 
+          "aText": "Leaf spongy. inf. terminal cylindrical spike. Glumas absent.",
+          "bText": "Leaves not spongy. Inf, of head or spikelets of florets. Glumes present",
+          "x": "6xf", 
+          "y": "7", "isFinal": false },
+
+          { "key":"6xf","text":"Typhaceae",
+          "isFinal": true},
+
+           { "key":"7", 
+          "aText": "Stems without nodes. Leaven 3-ranked, not ligulate with closed sheaths. Pla. enclosed by one glume. Styles 1. Seede 2-3 angled.",
+          "bText": "Stems with nodes. Leaves 2-ranked, ligulate. with open sheaths. Pls. enclosed by 2-glumen, rarely one. Stylen 2. Seeds rounded",
+          "x": "7xf", 
+          "y": "7yf", "isFinal": false },
+
+          { "key":"7xf","text":"Cyperaceae",
+          "isFinal": true},
+
+          { "key":"7yf","text":"Poaceae",
+          "isFinal": true},
+
+          { "key":"8", 
+          "aText": "Inf. terminal globose heads.",
+          "bText": "Inf. otherwise.",
+          "x": "9", 
+          "y": "10", "isFinal": false },
+
+          { "key":"9", 
+          "aText": "Fls. bisexual, yellow, Dracts dark-brown, coriaceous.Capsule many needed",
+          "bText": "Pls. unisexual, diety shite. Bracts not as above. Capsule 2-3 needed.Eriocaulaceae",
+          "x": "9xf", 
+          "y": "9yf", "isFinal": false },
+
+          { "key":"9xf","text":"xyridaceae",
+          "isFinal": true},
+
+          { "key":"9yf","text":"Eriocaulaceae",
+          "isFinal": true},
+
+          { "key":"10", 
+          "aText": "Plante free floating, submerged or marshy",
+          "bText": "Plants terrestrial or epiphytic",
+          "x": "11", 
+          "y": "16", "isFinal": false },
+
+          { "key":"11", 
+          "aText": "Ovary inferior.",
+          "bText": "Ovary superior",
+          "x": "11xf", 
+          "y": "12", "isFinal": false },
+
+          { "key":"11xf","text":"Hydrocharitaceae",
+          "isFinal": true},
+
+           { "key":"12", 
+          "aText": "Inf. umbellate on a acape.",
+          "bText": "Inf. not an above.",
+          "x": "12xf", 
+          "y": "13", "isFinal": false },
+
+          { "key":"12xf","text":"Butomaceae",
+          "isFinal": true},
+
+          { "key":"13", 
+          "aText": "Leaves oblong.",
+          "bText": "Leaven not so.",
+          "x": "13xf", 
+          "y": "14", "isFinal": false },
+
+          { "key":"13xf","text":"Aponogetonaceae",
+          "isFinal": true},
+
+          { "key":"14", 
+          "aText": "Pls. bisexual, blue.",
+          "bText": "Fla, unisexual or polygamous, white.",
+          "x": "14xf", 
+          "y": "15", "isFinal": false },
+
+          { "key":"14xf","text":"Pontedarlacese",
+          "isFinal": true},
+
+          { "key":"15", 
+          "aText": "Leaves radical, sagittate or ovate.it amana 6-24,",
+          "bText": "Leaves not radical, acicular. Stamen 1.",
+          "x": "15xf", 
+          "y": "15yf", "isFinal": false },
+
+          { "key":"15xf","text":"Alionataceas",
+          "isFinal": true},
+
+          { "key":"15yf","text":"Najadaceae",
+          "isFinal": true},
+
+          { "key":"16", 
+          "aText": "Stem arborescent. Leaves pinnately or palmately divided.",
+          "bText": "Stem not as above. Leaves entire.",
+          "x": "16xf", 
+          "y": "17", "isFinal": false },
+
+          { "key":"16xf","text":"Arecaceae",
+          "isFinal": true},
+
+          { "key":"17", 
+          "aText": "Climbers or twinners.",
+          "bText": "Plants erect or prost rate.",
+          "x": "18", 
+          "y": "20", "isFinal": false },
+
+           { "key":"18", 
+          "aText": "Plants monoecious. Fls. bisexual.",
+          "bText": "Plants dioecious. Fls. unisexual.",
+          "x": "19", 
+          "y": "18yf", "isFinal": false },
+
+          { "key":"16xf","text":"Dioscoreaceae",
+          "isFinal": true},
+
+          { "key":"19", 
+          "aText": "Inf. terminal panicle.",
+          "bText": "Inf. axillary umbellate cyme or racene.",
+          "x": "19xf", 
+          "y": "19yf", "isFinal": false },
+
+          { "key":"19xf","text":"Plagellariacene",
+          "isFinal": true},
+
+          { "key":"19yf","text":"Liliaceae",
+          "isFinal": true},
+
+           { "key":"20", 
+          "aText": "Fls. zygomorphic.",
+          "bText": "Fls. Act inomorphic.",
+          "x": "21", 
+          "y": "22", "isFinal": false },
+
+          { "key":"21", 
+          "aText": "Plants epiphytic (except Geodorum, Habenaria,and Peristylus). Median petal produced into a lip (labellum). Stanen and style united into a column.",
+          "bText": "Planet terrestrial. Median petal not an above. Stamen and style separate.",
+          "x": "21xf", 
+          "y": "21yf", "isFinal": false },
+
+          { "key":"21xf","text":"Orchidaceae",
+          "isFinal": true},
+
+          { "key":"21yf","text":"Zingiberaceae",
+          "isFinal": true},
+
+           { "key":"22", 
+          "aText": "Plants without rhizomatous stem (except Cyanotia tuberosa tuberose in which root stock)",
+          "bText": "Plants with rhizomatous or bulbous",
+          "x": "22xf", 
+          "y": "23", "isFinal": false },
+
+          { "key":"22xf","text":"Commelinaceae",
+          "isFinal": true},
+
+          { "key":"23", 
+          "aText": "Ovary superior",
+          "bText": "Ovary inferior stem.",
+          "x": "23xf", 
+          "y": "24", "isFinal": false },
+
+          { "key":"23xf","text":"Liliaceae",
+          "isFinal": true},
+
+           { "key":"24", 
+          "aText": "Perianth segments free, yellow.",
+          "bText": "Perianth segments connate white or purple.",
+          "x": "24xf", 
+          "y": "24yf", "isFinal": false },
+
+          { "key":"24xf","text":"Hypoxidaceae",
+          "isFinal": true},
+
+          { "key":"24yf","text":"Amaryllidaceae",
+          "isFinal": true}
+],
+
+  "group6" : [
+      { "key":"1", 
+          "aText": "Branches, leaves and sporangia bearing structure all arranged in whorls, stem ribbed, aerial, jointed and hollowed",
+          "bText": "Not so as above",
+          "x": "1xf",
+          "y": "2", "isFinal": false },
+
+        { "key":"1xf", "text": "Equisetaceae", "isFinal": true },
+
+        { "key":"2",
+          "aText": "Leaves microphyllous, with single central vein, sporangia borne singly on the upper side of fertile pinnae near base", 
+          "bText": "Leaves megaphyllous, with various types of veins, sporangia borne on the margin or on the abaxial surface of lamina generally in clusters.",
+          "x": "3",
+          "y": "5", "isFinal": false },
+
+        { "key":"3", 
+          "aText": "Spores one kind, leaves without ligules, vegetative leaves usually monomorphic", 
+          "bText": "Spores two kinds, leaves with ligule, vegetative lea mostl dimorphic", 
+          "x": "4", 
+          "y": "3yf", "isFinal": false },
+          
+        { "key":"3yf", "text":"Selaginellaceae", "isFinal": true },
+
+        { "key":"4", 
+          "aText": "Plant isodichotomously branched, roots basal, sporangia cauline or axillary,spores pitted",   
+          "bText": "Plants monopodially branched, roots scattered, sporangia foliar, spores without pits.",
+          "x":"4xf",
+          "y":"4yf", "isFinal": false },
+
+        { "key": "4xf", "text": "Huperziaceae", "isFinal": true },
+        { "key": "4yf", "text": "Lycopodiaceae", "isFinal": true },
+
+        { "key":"5", 
+          "aText": "Sporangia originating from a group of cells (Eusporangiate); its wallconsist of several layer of cells",
+          "bText": "Sporangia originated from single superficial cells; its wall consists of a single layer of cells.", 
+          "x": "6",
+          "y": "8", "isFinal": false },
+
+        { "key":"6", 
+          "aText": "Rhizome short, fleshy, without scales, leaves not circinate in bud, without stipule at base.",
+          "bText": "Rhizome erect, massive or horizontal. Leaves circinate in buds with stipules like appendages at base",
+          "x": "7",
+          "y": "6yf", "isFinal": false },
+
+        { "key":"6yf", "text":"Angiopteridaceae", "isFinal": true },
+
+        { "key":"7", 
+          "aText": "Venation dichotomous, open, sterile blade pinnate or tripartite with many small ultimate division. Sporangia globose, dehiscing horizontally.Gametophyte simple, unbranche", 
+          "bText": "Venation reticulate, sterile blades simple. Sproangia arranged in two lateral rows. Gametophyte branched",
+          "x":"7xf",
+          "y": "7yf", "isFinal": false },
+
+        { "key":"7xf", "text": "Botrychiaceae", "isFinal": true },
+        { "key":"7yf", "text": "Ophioglossaceae", "isFinal": true },
+
+        { "key":"8", 
+          "aText": "Aquatic or marshy plants",
+          "bText": "Terrestrial, epiphytic or petrophyllous plants",
+          "x": "9",
+          "y": "11", "isFinal": false },
+
+        { "key":"9", 
+          "aText": "Sporangia borne in sporocarps",
+          "bText": "Sporangia protected by reflexed leaf margin",
+          "x": "10",
+          "y": "9yf", "isFinal": false },
+
+        { "key": "9yf", "text": "Parkeriaceae", "isFinal": true },
+
+        { "key":"10", 
+          "aText": "Plants floating in water", 
+          "bText": "Plants rooted in mud ",
+          "x": "10xf",
+          "y": "10yf", "isFinal": false },
+
+        { "key": "10xf", "text": "Salviniaceae", "isFinal": true },
+        { "key": "10yf", "text": "Marsileaceae", "isFinal": true },
+
+        { "key":"11", 
+          "aText": "Tree ferns", 
+          "bText": "Not tree ferns", 
+          "x": "11xf",
+          "y": "12", "isFinal": false },
+
+        { "key": "11xf", "text": "Cyatheaceae", "isFinal": true },
+
+        { "key":"12", 
+          "aText": "Fronds dichotomously or pseudodichotomously branched with a dormant but at the axil of the fork.", 
+          "bText": "Not so as above.", 
+          "x": "12xf",
+          "y": "13", "isFinal": false },
+
+        { "key": "12xf", "text": "Glecheniaceae", "isFinal": true },
+
+        { "key":"13", 
+          "aText": "Plants climbing or clinging.", 
+          "bText": "Plants not climbing",
+          "x": "14",
+          "y": "15", "isFinal": false },
+
+        { "key":"14",
+          "aText": "Plants clinging, with distinct humous collecting fronds.", 
+          "bText": "Plants climbing/twinning, without separate umous collecting fronds",
+          "x": "14xf",
+          "y": "14yf", "isFinal": false },
+
+        { "key": "14xf", "text": "Drynariaceae", "isFinal": true },
+        { "key": "14yf", "text": "Lygodiaceae", "isFinal": true },
+
+        { "key":"15", 
+          "aText": "Lamina usually one cell thick and without stomata", 
+          "bText": "Not so as above", 
+          "x": "15xf",
+          "y": "16", "isFinal": false },
+
+        { "key": "15xf", "text": "Hymenophyllaceae", "isFinal": true },
+
+        { "key":"16", 
+          "aText": "Sporangia protected by reflexed margin of lamina",
+          "bText": "Sporangia not protected by reflexed margin of lamina",
+          "x": "17",
+          "y": "20", "isFinal": false },
+
+        { "key":"17",
+          "aText": "Sporangia borne on inner surface of reflexed portion of lamina", 
+          "bText": "Sporangia bome along the margin on the surface of lamina",
+          "x": "17xf",
+          "y": "18", "isFinal": false },
+
+        { "key": "17xf", "text": "Adiantaceae", "isFinal": true },
+
+        { "key":"18",
+          "aText": "Pseudoindusium continuous.", 
+          "bText": "Pseudoindusium discontinuous.", 
+          "x": "18xf",
+          "y": "19", "isFinal": false },
+
+        { "key": "18xf", "text": "Pteridaceae", "isFinal": true },
+
+        { "key":"19", 
+          "aText": "Rhizome hairy", 
+          "bText": "Rhizome scaly", 
+          "x": "19xf",
+          "y": "19yf", "isFinal": false },
+
+        { "key": "19xf", "text": "Pteridiaceae", "isFinal": true },
+        { "key": "19yf", "text": "Sinopteridaceae", "isFinal": true },
+
+        { "key":"20", 
+          "aText": "Rhizome hairy", 
+          "bText": "Rhizome scaly",
+          "x": "21",
+          "y": "22", "isFinal": false },
+
+        { "key":"21", 
+          "aText": "Sporangia borne along veins", 
+          "bText": "Sporangia terminal on veins", 
+          "x": "21xf",
+          "y": "21yf", "isFinal": false },
+
+        { "key": "21xf", "text": "Hemionitidaceae", "isFinal": true },
+        { "key": "21yf", "text": "Dennstaediaceae", "isFinal": true },
+
+        { "key":"22", 
+          "aText": "Rhizome scales clathrate.",
+          "bText": "Rhizome scales usually non-clathrate or sometimes subclathrate",
+          "x": "23",
+          "y": "25", "isFinal": false },
+
+        { "key":"23",
+          "aText": "Veins dichotomously forked.", 
+          "bText": "Not so as above.",
+          "x": "23xf",
+          "y": "24", "isFinal": false },
+
+        { "key": "23xf", "text": "Antrophyaceae", "isFinal": true },
+
+        { "key":"24",
+          "aText": "Sori round, oval or linear and in some cases achrostichoid, exindusiate.", 
+          "bText": "Sori strictly, indusiate",
+          "x": "24xf",
+          "y": "24yf", "isFinal": false },
+
+        { "key": "24xf", "text": "Polypodiaceae", "isFinal": true },
+        { "key": "24yf", "text": "Aspleniaceae", "isFinal": true },
+
+        { "key":"25",
+          "aText": "Generally epiphytic ferns", 
+          "bText": "Terrestrial Ferns.", 
+          "x": "26",
+          "y": "27", "isFinal": false },
+
+        { "key":"26",
+          "aText": "Pinnac articulated to rachis.", 
+          "bText": "Pinnae not articulated to rachis", 
+          "x": "26xf",
+          "y": "26yf", "isFinal": false },
+
+        { "key": "26xf", "text": "Nephrolepidaceae", "isFinal": true },
+        { "key": "26yf", "text": "Davalliaceae", "isFinal": true },
+
+        { "key":"27",
+          "aText": "Indusium consists of tuft of multicellular hairs", 
+          "bText": "Not so as above.",
+          "x": "27xf",
+          "y": "28", "isFinal": false },
+
+        { "key": "27xf", "text": "Woodsiaceae", "isFinal": true },
+
+        { "key":"28", 
+          "aText": "Sori parallel to costa", 
+          "bText": "Sori otherwise.", 
+          "x": "28xf",
+          "y": "29", "isFinal": false },
+
+        { "key": "28xf", "text": "Blechnaceae", "isFinal": true },
+
+        { "key":"29",
+          "aText": "Sori marginal", 
+          "bText": "Sori not so as above", 
+          "x": "29xf",
+          "y": "30", "isFinal": false },
+
+        { "key": "29xf", "text": "Lindsaeaceae", "isFinal": true },
+
+        { "key":"30",
+          "aText": "Indusium 'J' shaped along or crossing the veins.", 
+          "bText": "Indusium usually round and reniform",
+          "x": "30xf",
+          "y": "31", "isFinal": false },
+
+        { "key": "30xf", "text": "Athyriaceae", "isFinal": true },
+
+        { "key":"31",
+          "aText": "Rachis grooved on dorsal side, opening towards rachillae groove", 
+          "bText": "Rachis without dorsal groove or if grooved, not open to rachillae",
+          "x": "31xf",
+          "y": "32", "isFinal": false },
+
+        { "key": "31xf", "text": "Dryopteridaceae", "isFinal": true },
+
+        { "key":"32",
+          "aText": "Unicellular hairs abundant at least on dorsal side of costa, indusium round and reniform", 
+          "bText": "Multicellular hairs usually present at least on dorsal side of rachis, rachillac and costa.", 
+          "x": "32xf", 
+          "y": "32yf", "isFinal": false },
+
+        {"key": "32xf", "text": "Thelypteridaceae", "isFinal": true },
+        {"key": "32yf", "text": "Tectariaceae", "isFinal": true }
+    ]
+}
