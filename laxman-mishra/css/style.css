@@ -84,3 +84,21 @@ margin-left: -2px;
     float:left;
     /*margin-top: -20px;*/
 }
+.head h1{
+    font-size: 1.8em;
+    margin: 0 auto;
+    padding: 0.5em;
+  }
+
+@media screen and (max-width: 420px) {
+  .head h1{
+    font-size: 1.8em;
+    padding: 0.5em;
+    width: 14em;
+    word-break: break-word;
+    margin: 0 auto;
+  }
+  .ui-header .ui-title { 
+    margin-left: 50px !important;
+    }
+}
