@@ -75,7 +75,7 @@
           <a class="sidenav-link" href="/"> <i class="fas fa-tree pr-3"></i>Flowering</a>
           <ul class="sidenav-collapse">
             <li class="sidenav-item">
-              <a class="sidenav-link" href="javascript:loadModel('group1', 'Flowering : Group 1');">Group 1</a>
+              <a class="sidenav-link" href="javascript:loadModel('group1', 'Flowering : Group 1'); ">Group 1</a>
             </li>
             <li class="sidenav-item">
               <a class="sidenav-link" href="javascript:loadModel('group2', 'Flowering : Group 2');">Group 2</a>
@@ -303,7 +303,7 @@
               font: '20px Roboto, sans-serif',
               wrap: go.TextBlock.WrapFit, desiredSize: new go.Size(200, NaN), margin: 5
             },
-            new go.Binding("text", "text"))
+            new go.Binding("text", "finalText"))
         ));
       // define the only Link template
       myDiagram.linkTemplate =
@@ -350,8 +350,8 @@
         if (nda[i].isFinal == false) {
           var start = nda[i].key;
 
-          var xEnd = nda[i].x;
-          var yEnd = nda[i].y;
+          var xEnd = nda[i].aKey;
+          var yEnd = nda[i].bKey;
 
           //console.log(start + "--x--" + xEnd) ;
           var objX = { from: start, fromport: 'x', to: xEnd };

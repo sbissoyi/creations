@@ -1,0 +1,151 @@
+<!--
+    Author: Swarupananda Bissoyi
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link href="css/style.css" rel="stylesheet">
+        <!-- <link rel="shortcut icon" type="image/png" href="img/favicon.png"> -->
+        <title>Plant Identification</title>
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+
+        <script src="js/jquery-1.11.2.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.js"></script>
+        <script src="js/lunr.js"></script>
+        
+    	<style type="text/css">
+    		.ui-input-text input, .ui-input-search input, textarea.ui-input-text {
+			     height:42px !important;
+                 font-size: 20px;
+			}
+     	</style>
+    </head>
+    <body>
+        <!--<script type="text/javascript" src="cordova.js"></script>-->
+        <!-- <script type="text/javascript" src="js/index.js"></script> -->
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+		    <symbol id="icon-copy" viewBox="0 0 32 32">
+		        <path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"></path>
+		    </symbol>
+		</svg>
+
+        <div data-role="page" id="mainpage">
+             <div  data-role="header" data-position="fixed" data-tap-toggle="false" data-transition="none">
+                 <div>
+                    <!-- <img src="img/favicon.png" class="ui-btn-left"/> -->
+                    <div class="head"><h1>Plant Identification</h1></div>
+                    <a href="#helppage" data-ajax="false" class="ui-btn ui-btn-right ui-icon-info ui-btn-icon-notext ui-corner-all">help</a>
+                </div>
+                 
+            </div>
+            
+            <div id="pageContent" data-role="content" class="ui-content" data-iscroll>
+                <div id="searchBox">
+                    <input id="searchfield" type="search" name="searchfield" placeholder="Write the features of the Plant" autocomplete="off" autocapitalize="none" data-theme="a">
+                    <a href="" data-role="none" id="btn_search" class="ui-btn ui-btn-right">Search</a>
+                </div>
+                <p id="species"></p>
+            </div>
+            <!--<div data-role="footer">
+            </div>-->
+        </div>
+        <div data-role="page" id="helppage" data-add-back-btn="true">
+            <div data-role="header">
+                <!-- <div><img src="img/favicon.png" class="ui-btn-left"/></div> -->
+                <div class="head"><h1>About this application</h1></div>
+                <a href="#mainpage" id="backBtn2" data-ajax="false" data-rel="back" class="ui-btn ui-btn-right ui-icon-back ui-btn-icon-notext ui-corner-all">back</a>
+            </div>
+
+            <div role="main" class="ui-content" >
+                <p style="text-align: left;"></p>
+            </div>
+            <!--<div data-role="footer">
+            </div>-->
+        </div>
+        <script type='text/javascript'>
+            var json ;
+            var docs = [] ;
+                        
+            function traverse(couplet, text, path, pathLen)
+            {
+                if ( couplet == undefined)
+                    return ;
+                path[pathLen++] = text ; 
+                if (couplet.isFinal == true) {
+                    totalPath = path.join("; ");
+                    var doc = {
+                        "name": couplet.finalText,
+                        "text": totalPath
+                        } ;
+                    docs.push(doc);
+                    //total = totalPath + "----> " +  couplet.finalText ;
+                    //console.log("\n" + total) ;
+
+                }
+                else {
+                    left = group.filter( x => x.key == couplet.aKey);
+                    traverse(left[0], couplet.aText, path, pathLen);
+
+                    right = group.filter( x => x.key == couplet.bKey);
+                    traverse(right[0], couplet.bText, path, pathLen);
+                }
+            }
+
+            
+            async function loadJSON() {
+                const response = await fetch("taxa.json");
+                json = await response.json();
+                Object.entries(json).forEach(([key, value]) => {
+                        group = value;
+                        var path = [];
+                        traverse(group[0], "", path, 0);
+                    });
+                console.log(docs.length);
+                lunrIndex = lunr(function () {
+                    this.ref('name');
+                    this.field('text');
+                    for (var i = 0; i < docs.length; ++i) {
+                        this.add(docs[i]);
+                    }
+                });
+            }
+            $(document).ready(function () {
+                loadJSON() ;
+                
+
+                $('#searchfield').bind('input', function() { 
+                    searchWord = $('#searchfield').val().trim();
+                    //lunr giving query parser eror for ":" character
+                    searchWord = searchWord.replace(':', " ");
+
+                    if (searchWord.length > 0 )
+                    {
+                        result = lunrIndex.search(searchWord);
+                        var k=0;
+                        if ( result.length > 0 ) {
+                            resultText = "<b>Results according to Score</b><br>";
+                            for (let index = 0; index < result.length; index++) {
+                                txt = k++ + ". " + result[index].ref + " - Score : " + result[index].score + "<br>" ;
+                                resultText += txt;
+                                //console.log(resultText);
+                                document.getElementById("species").innerHTML = resultText ;
+                            }
+                        }
+                        else
+                            document.getElementById("species").innerHTML = "";
+                    }
+                });
+            });
+            $('#backBtn2').on('click', function(e){
+                $.mobile.back();
+            }) ;
+        </script>
+    </body>
+</html>
